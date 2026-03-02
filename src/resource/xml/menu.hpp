@@ -15,6 +15,7 @@ namespace game::resource::xml
       SoundEntryCollection close{};
       SoundEntryCollection hover{};
       SoundEntryCollection select{};
+      SoundEntryCollection cheatsActivated{};
     };
 
     Sounds sounds{};

@@ -22,13 +22,14 @@ namespace game::state::main
     auto& pan = canvas.pan;
     auto& zoom = canvas.zoom;
     auto& io = ImGui::GetIO();
-    bool isPan{true};
     auto isMouseMiddleDown = ImGui::IsMouseDown(ImGuiMouseButton_Middle);
+    auto isMouseLeftDown = ImGui::IsMouseDown(ImGuiMouseButton_Left);
+    auto isCtrlDown = ImGui::IsKeyDown(ImGuiMod_Ctrl);
     auto panMultiplier = ZOOM_BASE / zoom;
 
     if (!ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow) && !ImGui::IsAnyItemActive())
     {
-      if ((isMouseMiddleDown) && isPan)
+      if ((isMouseMiddleDown) || (isMouseLeftDown && isCtrlDown))
       {
         cursor.queue_play({cursorSchema.animations.pan.get()});
         pan -= imgui::to_vec2(io.MouseDelta) * panMultiplier;

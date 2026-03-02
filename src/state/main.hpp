@@ -42,6 +42,8 @@ namespace game::state
     int areaIndex{};
 
     float autosaveTime{};
+    int konamiCodeIndex{};
+    double konamiCodeStartTime{};
 
     bool isWindows{true};
 

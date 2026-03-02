@@ -87,6 +87,22 @@ namespace game::resource::xml
         query_sound_entry_collection(element, "Dispose", archive, soundRootPath, sounds.dispose);
         query_sound_entry_collection(element, "Return", archive, soundRootPath, sounds.return_);
         query_sound_entry_collection(element, "Summon", archive, soundRootPath, sounds.summon);
+        query_sound_entry_collection(element, "Upgrade", archive, soundRootPath, sounds.upgrade);
+        query_sound_entry_collection(element, "UpgradeFail", archive, soundRootPath, sounds.upgradeFail);
+      }
+
+      if (auto element = root->FirstChildElement("Items"))
+      {
+        int id{};
+
+        for (auto child = element->FirstChildElement("Item"); child; child = child->NextSiblingElement("Item"))
+        {
+          std::string name{};
+          query_string_attribute(child, "Name", &name);
+          stringToIDMap[name] = id;
+          idToStringMap[id] = name;
+          id++;
+        }
       }
 
       if (auto element = root->FirstChildElement("Items"))
@@ -108,7 +124,24 @@ namespace game::resource::xml
           query_float_optional_attribute(child, "DigestionBonus", item.digestionBonus);
           query_float_optional_attribute(child, "EatSpeedBonus", item.eatSpeedBonus);
           query_float_optional_attribute(child, "Gravity", item.gravity);
+
           query_int_optional_attribute(child, "ChewCount", item.chewCount);
+
+          if (child->FindAttribute("UpgradeID"))
+          {
+            std::string upgradeIDString{};
+            query_string_attribute(child, "UpgradeID", &upgradeIDString);
+
+            if (!upgradeIDString.empty() && stringToIDMap.contains(upgradeIDString))
+              item.upgradeID = stringToIDMap[upgradeIDString];
+            else if (upgradeIDString.empty())
+              logger.warning(std::format("Empty UpgradeID ({})", item.name));
+            else
+              logger.warning(std::format("Could not find item ID for UpgradeID: {} ({})", upgradeIDString, item.name));
+
+            query_int_optional_attribute(child, "UpgradeCount", item.upgradeCount);
+          }
+
           query_bool_attribute(child, "IsPlayReward", &item.isPlayReward);
           query_bool_attribute(child, "IsToggleSpritesheet", &item.isToggleSpritesheet);
 

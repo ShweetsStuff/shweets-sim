@@ -56,7 +56,7 @@ The file path of the area's texture (background).
 Gravity the area has; applies to items' velocities per tick.
 #### Friction (float)
 Friction of the area; applies to items' velocities when grounded or hitting walls.
-### AirResistance (float)
+#### AirResistance (float)
 Air resistance of the area; applies to items' velocities when airborne.
 
 ## character.xml
@@ -416,6 +416,10 @@ The additional eat speed multiplier the item will give if eaten.
 The item's gravity; will use the default gravity if not available.
 #### ChewCount (int; optional)
 An item's custom chew count.
+#### UpgradeID (string; optional)
+The name of another item that this item will be able to be upgraded to.
+#### UpgradeCount (int; optional)
+The amount of this item it will take to upgrade to the upgrade item specified in UpgradeID.
 #### IsPlayReward (bool; optional)
 The item will be given out when the reward is hit in play (see play.xml)
 #### IsToggleSpritesheet (bool; optional)
@@ -449,6 +453,10 @@ Will play when hovering over a widget in a menu.
 The sound that will play, based on SoundRootPath.
 ### Select
 Will play when clicking on a widget in a menu.
+#### Sound (path)
+The sound that will play, based on SoundRootPath.
+### CheatsActivated
+Sound that will play after entering a special code to activate cheats.
 #### Sound (path)
 The sound that will play, based on SoundRootPath.
 

@@ -36,6 +36,7 @@ namespace game::resource::xml
         query_sound_entry_collection(element, "Close", archive, soundRootPath, sounds.close);
         query_sound_entry_collection(element, "Hover", archive, soundRootPath, sounds.hover);
         query_sound_entry_collection(element, "Select", archive, soundRootPath, sounds.select);
+        query_sound_entry_collection(element, "CheatsActivated", archive, soundRootPath, sounds.cheatsActivated);
       }
     }
 

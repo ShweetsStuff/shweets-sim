@@ -76,6 +76,9 @@ namespace game::state::main
         auto canvasSize = ivec2(std::max(1.0f, previewSize.x), std::max(1.0f, previewSize.y));
         if (!canvases.contains(i)) canvases.emplace((int)i, Canvas(canvasSize, Canvas::FLIP));
         auto& canvas = canvases[i];
+        bool isPossibleToUpgrade = item.upgradeID.has_value() && item.upgradeCount.has_value() &&
+                                   schema.idToStringMap.contains(*item.upgradeID);
+        bool isAbleToUpgrade = isPossibleToUpgrade && quantity >= *item.upgradeCount;
         canvas.zoom = math::to_percent(previewScale);
         canvas.pan = vec2(rect.x, rect.y);
         canvas.bind();
@@ -90,7 +93,30 @@ namespace game::state::main
                                          quantity <= 0 ? ImVec4(0, 0, 0, 1) : ImVec4(1, 1, 1, 1))) &&
             quantity > 0)
         {
-          if (category.isEdible)
+          if (ImGui::IsKeyDown(ImGuiMod_Shift))
+          {
+            if (isAbleToUpgrade)
+            {
+              if (ImGui::IsKeyDown(ImGuiMod_Ctrl))
+              {
+                while (quantity >= *item.upgradeCount)
+                {
+                  values.at(*item.upgradeID)++;
+                  quantity -= *item.upgradeCount;
+                }
+              }
+              else
+              {
+                values.at(*item.upgradeID)++;
+                quantity -= *item.upgradeCount;
+              }
+
+              schema.sounds.upgrade.play();
+            }
+            else
+              schema.sounds.upgradeFail.play();
+          }
+          else if (category.isEdible)
           {
             if (itemManager.items.size() + 1 >= ItemManager::LIMIT)
               character.data.itemSchema.sounds.dispose.play();
@@ -143,6 +169,14 @@ namespace game::state::main
               else if (eatSpeedBonus < 0)
                 ImGui::Text("Eat Speed Penalty: %0.2f%% / sec", *eatSpeedBonus);
             }
+
+            if (isPossibleToUpgrade)
+            {
+              ImGui::Text("Upgrade: %ix -> %s", *item.upgradeCount, schema.idToStringMap.at(*item.upgradeID).c_str());
+              if (isAbleToUpgrade)
+                ImGui::TextUnformatted("(Shift + Click -> Upgrade)\n(Shift + Ctrl + Click -> Upgrade All)");
+            }
+
             ImGui::PopStyleColor();
 
             ImGui::Separator();

@@ -42,6 +42,8 @@ namespace game::resource::xml
       std::string description{UNDEFINED};
       int categoryID{};
       int rarityID{};
+      std::optional<int> upgradeCount{};
+      std::optional<int> upgradeID{};
       std::optional<int> flavorID;
       std::optional<float> calories{};
       std::optional<float> eatSpeedBonus{};
@@ -63,11 +65,15 @@ namespace game::resource::xml
       SoundEntryCollection return_{};
       SoundEntryCollection dispose{};
       SoundEntryCollection summon{};
+      SoundEntryCollection upgrade{};
+      SoundEntryCollection upgradeFail{};
     };
 
     std::unordered_map<std::string, int> categoryMap{};
     std::unordered_map<std::string, int> rarityMap{};
     std::unordered_map<std::string, int> flavorMap{};
+    std::unordered_map<std::string, int> stringToIDMap{};
+    std::unordered_map<int, std::string> idToStringMap{};
 
     using Pool = std::vector<int>;
 

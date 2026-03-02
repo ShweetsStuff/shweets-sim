@@ -28,13 +28,13 @@ namespace game::state::main
     state::Configuration configuration;
 
 #if DEBUG
-    bool isCheats{true};
+    bool isCheats{};
     bool isDebug{true};
 #else
     bool isCheats{};
     bool isDebug{};
 #endif
-    
+
     bool isOpen{true};
     bool isChat{true};
     util::imgui::WindowSlide slide{};

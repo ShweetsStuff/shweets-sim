@@ -1,5 +1,6 @@
 #include "main.hpp"
 
+#include <array>
 #include <glm/glm.hpp>
 #include <imgui.h>
 #include <imgui_impl_opengl3.h>
@@ -34,6 +35,8 @@ namespace game::state
     auto& dialogue = data.dialogue;
     auto& menuSchema = data.menuSchema;
     this->characterIndex = selectedCharacterIndex;
+    konamiCodeIndex = 0;
+    konamiCodeStartTime = 0.0;
 
     character =
         entity::Character(data, vec2(World::BOUNDS.x + World::BOUNDS.z * 0.5f, World::BOUNDS.w - World::BOUNDS.y));
@@ -132,8 +135,54 @@ namespace game::state
 
   void Main::update(Resources& resources)
   {
+    static constexpr std::array<ImGuiKey, 10> KONAMI_CODE = {
+        ImGuiKey_UpArrow,    ImGuiKey_UpArrow,   ImGuiKey_DownArrow,  ImGuiKey_DownArrow, ImGuiKey_LeftArrow,
+        ImGuiKey_RightArrow, ImGuiKey_LeftArrow, ImGuiKey_RightArrow, ImGuiKey_B,         ImGuiKey_A};
+    static constexpr std::array<ImGuiKey, 6> KONAMI_INPUT_KEYS = {
+        ImGuiKey_UpArrow, ImGuiKey_DownArrow, ImGuiKey_LeftArrow, ImGuiKey_RightArrow, ImGuiKey_B, ImGuiKey_A};
+    static constexpr auto KONAMI_CODE_INPUT_TIME_SECONDS = 5.0;
+
     auto focus = focus_get();
     auto& dialogue = character.data.dialogue;
+
+    if (!menu.isCheats)
+    {
+      for (auto key : KONAMI_INPUT_KEYS)
+      {
+        if (!ImGui::IsKeyPressed(key, false)) continue;
+
+        if (key == KONAMI_CODE[konamiCodeIndex])
+        {
+          konamiCodeIndex++;
+          konamiCodeStartTime = ImGui::GetTime();
+        }
+        else if (key == KONAMI_CODE[0])
+        {
+          konamiCodeIndex = 1;
+          konamiCodeStartTime = ImGui::GetTime();
+        }
+        else
+        {
+          konamiCodeIndex = 0;
+          konamiCodeStartTime = 0.0;
+        }
+
+        if (konamiCodeIndex >= (int)KONAMI_CODE.size())
+        {
+          menu.isCheats = true;
+          konamiCodeIndex = 0;
+          konamiCodeStartTime = 0.0;
+          toasts.push("Cheats unlocked!");
+          character.data.menuSchema.sounds.cheatsActivated.play();
+        }
+      }
+
+      if (konamiCodeIndex > 0 && (ImGui::GetTime() - konamiCodeStartTime > KONAMI_CODE_INPUT_TIME_SECONDS))
+      {
+        konamiCodeIndex = 0;
+        konamiCodeStartTime = 0.0;
+      }
+    }
 
     if (isWindows)
     {
