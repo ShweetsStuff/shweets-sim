@@ -74,7 +74,7 @@ namespace game::state::main
     static constexpr auto BG_COLOR_MULTIPLIER = 0.5f;
     static constexpr ImVec4 LINE_COLOR = ImVec4(1, 1, 1, 1);
     static constexpr ImVec4 PERFECT_COLOR = ImVec4(1, 1, 1, 0.50);
-    static constexpr auto LINE_HEIGHT = 2.0f;
+    static constexpr auto LINE_HEIGHT = 5.0f;
     static constexpr auto LINE_WIDTH_BONUS = 10.0f;
     static constexpr auto TOAST_MESSAGE_SPEED = 1.0f;
     static constexpr auto ITEM_FALL_GRAVITY = 2400.0f;
