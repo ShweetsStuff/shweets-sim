@@ -1,0 +1,47 @@
+if(NOT DEFINED BIN_ROOT OR BIN_ROOT STREQUAL "")
+    message(FATAL_ERROR "BIN_ROOT is required")
+endif()
+
+if(NOT DEFINED TARGET_DIR OR TARGET_DIR STREQUAL "")
+    message(FATAL_ERROR "TARGET_DIR is required")
+endif()
+
+if(NOT DEFINED EXE_FILE OR EXE_FILE STREQUAL "")
+    message(FATAL_ERROR "EXE_FILE is required")
+endif()
+
+if(NOT DEFINED PACKAGE_NAME OR PACKAGE_NAME STREQUAL "")
+    set(PACKAGE_NAME "snivy-win32")
+endif()
+
+set(EXE_PATH "${TARGET_DIR}/${EXE_FILE}")
+set(PACKAGE_DIR "${BIN_ROOT}/${PACKAGE_NAME}")
+set(ARCHIVE_PATH "${BIN_ROOT}/${PACKAGE_NAME}.zip")
+set(TARGET_RESOURCES_DIR "${TARGET_DIR}/resources")
+set(BIN_RESOURCES_DIR "${BIN_ROOT}/resources")
+
+file(MAKE_DIRECTORY "${BIN_ROOT}")
+file(REMOVE_RECURSE "${PACKAGE_DIR}")
+file(REMOVE "${ARCHIVE_PATH}")
+file(MAKE_DIRECTORY "${PACKAGE_DIR}")
+
+if(EXISTS "${EXE_PATH}")
+    file(COPY "${EXE_PATH}" DESTINATION "${PACKAGE_DIR}")
+else()
+    message(FATAL_ERROR "Executable not found: ${EXE_PATH}")
+endif()
+
+if(EXISTS "${TARGET_RESOURCES_DIR}")
+    file(COPY "${TARGET_RESOURCES_DIR}" DESTINATION "${PACKAGE_DIR}")
+elseif(EXISTS "${BIN_RESOURCES_DIR}")
+    file(COPY "${BIN_RESOURCES_DIR}" DESTINATION "${PACKAGE_DIR}")
+endif()
+
+execute_process(
+        COMMAND "${CMAKE_COMMAND}" -E tar cf "${PACKAGE_NAME}.zip" --format=zip "${PACKAGE_NAME}"
+        WORKING_DIRECTORY "${BIN_ROOT}"
+        RESULT_VARIABLE ZIP_RESULT
+)
+if(NOT ZIP_RESULT EQUAL 0)
+    message(FATAL_ERROR "Failed creating ${ARCHIVE_PATH}")
+endif()

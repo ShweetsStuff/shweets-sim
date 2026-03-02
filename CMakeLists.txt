@@ -259,6 +259,17 @@ else()
     target_link_libraries(${PROJECT_NAME} PRIVATE OpenGL::GL)
 endif()
 
+if(WIN32 AND NOT CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
+    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+            COMMAND ${CMAKE_COMMAND}
+                    -DBIN_ROOT="${CMAKE_BINARY_DIR}/bin"
+                    -DTARGET_DIR="$<TARGET_FILE_DIR:${PROJECT_NAME}>"
+                    -DEXE_FILE="$<TARGET_FILE_NAME:${PROJECT_NAME}>"
+                    -DPACKAGE_NAME="snivy-win32"
+                    -P "${CMAKE_CURRENT_SOURCE_DIR}/cmake/create_windows_zip.cmake"
+            COMMENT "Creating snivy-win32 package")
+endif()
+
 message(STATUS "System: ${CMAKE_SYSTEM_NAME}")
 message(STATUS "Project: ${PROJECT_NAME}")
 message(STATUS "Compiler: ${CMAKE_CXX_COMPILER}")
