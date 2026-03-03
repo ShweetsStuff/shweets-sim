@@ -199,7 +199,7 @@ if(NOT CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
 endif()
 
 set(PROJECT_RESOURCES_DIR "${CMAKE_CURRENT_SOURCE_DIR}/resources")
-set(PROJECT_RESOURCES_BINARY_DIR "$<TARGET_FILE_DIR:${PROJECT_NAME}>/resources")
+set(PROJECT_RESOURCES_BINARY_DIR "${CMAKE_BINARY_DIR}/bin/$<CONFIG>/resources")
 if(EXISTS "${PROJECT_RESOURCES_DIR}")
     file(GLOB_RECURSE PROJECT_RESOURCE_FILES CONFIGURE_DEPENDS
             "${PROJECT_RESOURCES_DIR}/*")
@@ -209,7 +209,6 @@ if(EXISTS "${PROJECT_RESOURCES_DIR}")
                         -DSRC_DIR="${PROJECT_RESOURCES_DIR}"
                         -DDST_DIR="${PROJECT_RESOURCES_BINARY_DIR}"
                         -P "${CMAKE_CURRENT_SOURCE_DIR}/cmake/copy_resources.cmake"
-                WORKING_DIRECTORY "$<TARGET_FILE_DIR:${PROJECT_NAME}>"
                 DEPENDS ${PROJECT_RESOURCE_FILES}
                 COMMENT "Copying resources directory")
         add_dependencies(${PROJECT_NAME} copy_resources)
