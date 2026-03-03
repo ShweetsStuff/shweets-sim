@@ -17,7 +17,7 @@ namespace game::resource::xml
   class AnimationEntryCollection : public std::vector<AnimationEntry>
   {
   public:
-    const std::string& get();
+    std::string* get();
   };
 
 }

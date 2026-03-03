@@ -18,7 +18,7 @@ namespace game::resource::xml
   class SoundEntryCollection : public std::vector<SoundEntry>
   {
   public:
-    Audio& get();
+    Audio* get();
     void play();
   };
 }

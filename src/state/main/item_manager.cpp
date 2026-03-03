@@ -74,7 +74,11 @@ namespace game::state::main
     }
     queuedItemIDs.clear();
 
-    if (isMouseRightDown) cursor.queue_play({cursorSchema.animations.return_.get()});
+    if (isMouseRightDown)
+    {
+      auto animation = cursorSchema.animations.return_.get();
+      if (animation) cursor.queue_play({*animation});
+    }
 
     if (auto heldItem = vector::find(items, heldItemIndex))
     {
@@ -208,7 +212,7 @@ namespace game::state::main
       if (math::is_point_in_rectf(item.rect(), cursorPosition) && !isImguiCaptureMouse)
       {
         isItemHovered = true;
-        cursor.queue_play({cursorSchema.animations.hover.get()});
+        if (auto animation = cursorSchema.animations.hover.get()) cursor.queue_play({*animation});
         cursor.state = entity::Cursor::HOVER;
 
         if (isMouseLeftClicked)
@@ -220,7 +224,7 @@ namespace game::state::main
         if (isMouseLeftDown)
         {
           isItemHeld = true;
-          cursor.queue_play({cursorSchema.animations.grab.get()});
+          if (auto animation = cursorSchema.animations.grab.get()) cursor.queue_play({*animation});
           cursor.state = entity::Cursor::ACTION;
           heldItemIndex = i;
           heldItemMoveIndex = i;

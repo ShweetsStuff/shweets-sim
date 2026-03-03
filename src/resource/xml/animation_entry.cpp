@@ -4,8 +4,9 @@
 
 namespace game::resource::xml
 {
-  const std::string& AnimationEntryCollection::get()
+  std::string* AnimationEntryCollection::get()
   {
-    return at(util::vector::random_index_weighted(*this, [](const auto& entry) { return entry.weight; })).animation;
+    if (empty()) return nullptr;
+    return &at(util::vector::random_index_weighted(*this, [](const auto& entry) { return entry.weight; })).animation;
   }
 }

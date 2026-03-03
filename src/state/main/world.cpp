@@ -31,7 +31,7 @@ namespace game::state::main
     {
       if ((isMouseMiddleDown) || (isMouseLeftDown && isCtrlDown))
       {
-        cursor.queue_play({cursorSchema.animations.pan.get()});
+        if (auto animation = cursorSchema.animations.pan.get()) cursor.queue_play({*animation});
         pan -= imgui::to_vec2(io.MouseDelta) * panMultiplier;
       }
 
@@ -44,7 +44,7 @@ namespace game::state::main
         auto zoomFactorBefore = math::to_unit(zoomBefore);
         auto cursorWorld = pan + (cursorPos / zoomFactorBefore);
 
-        cursor.queue_play({cursorSchema.animations.zoom.get()});
+        if (auto animation = cursorSchema.animations.zoom.get()) cursor.queue_play({*animation});
 
         zoom = glm::clamp(ZOOM_MIN, zoom + (io.MouseWheel * ZOOM_STEP), ZOOM_MAX);
 
