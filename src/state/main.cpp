@@ -110,6 +110,8 @@ namespace game::state
       character.queue_play({.animation = dialogue.start.animation, .isInterruptible = false});
       character.tick();
       isStart = true;
+      isStartBegin = false;
+      isStartEnd = false;
     }
   }
 

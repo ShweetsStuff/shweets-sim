@@ -177,7 +177,7 @@ namespace game::state::main
 
           // Food stolen
           if (auto animation = character.animation_get(character.animation_name_convert(eatArea.animation));
-              character.is_playing(animation->name) && !isOverCapacity)
+              character.is_playing(animation->name))
           {
             if (!math::is_point_in_rectf(rect, heldItem->position))
               text.set(dialogue.get(isOverCapacity ? dialogue.foodTakenFull : dialogue.foodTaken), character);
