@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../canvas.hpp"
+#include "../render/canvas.hpp"
 
 #include "select/characters.hpp"
 #include "select/info.hpp"

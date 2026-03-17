@@ -1,6 +1,5 @@
 #pragma once
 
-#include "../util/interact_type.hpp"
 #include "actor.hpp"
 
 namespace game::entity
@@ -16,7 +15,7 @@ namespace game::entity
     };
 
     State state{DEFAULT};
-    InteractType mode{InteractType::RUB};
+    int interactTypeID{-1};
 
     Cursor() = default;
     Cursor(resource::xml::Anm2&);

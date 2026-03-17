@@ -31,8 +31,8 @@ namespace game
       case SELECT:
         select.tick();
         break;
-      case MAIN:
-        main.tick(resources);
+      case PLAY:
+        play.tick(resources);
         break;
       default:
         break;
@@ -52,7 +52,7 @@ namespace game
       ImGui_ImplSDL3_ProcessEvent(&event);
       if (event.type == SDL_EVENT_QUIT)
       {
-        if (type == MAIN) main.exit(resources);
+        if (type == PLAY) play.exit(resources);
         isRunning = false;
       }
       if (!isRunning) return;
@@ -68,30 +68,30 @@ namespace game
         select.update(resources);
         if (select.info.isNewGame || select.info.isContinue)
         {
-          Main::Game game = select.info.isNewGame ? Main::NEW_GAME : Main::CONTINUE;
-          if (game == Main::NEW_GAME) resources.character_save_set(select.characterIndex, resource::xml::Save());
+          Play::Game game = select.info.isNewGame ? Play::NEW_GAME : Play::CONTINUE;
+          if (game == Play::NEW_GAME) resources.character_save_set(select.characterIndex, resource::xml::Save());
 
-          main.set(resources, select.characterIndex, game);
-          type = MAIN;
+          play.set(resources, select.characterIndex, game);
+          type = PLAY;
 
           select.info.isNewGame = false;
           select.info.isContinue = false;
         }
         break;
-      case MAIN:
-        main.update(resources);
-        if (main.menu.configuration.isGoToSelect)
+      case PLAY:
+        play.update(resources);
+        if (play.menu.settingsMenu.isGoToSelect)
         {
-          main.exit(resources);
+          play.exit(resources);
           type = SELECT;
-          main.menu.configuration.isGoToSelect = false;
+          play.menu.settingsMenu.isGoToSelect = false;
         }
         break;
       default:
         break;
     }
 
-    auto isHideCursor = type == MAIN;
+    auto isHideCursor = type == PLAY;
     if (isHideCursor != isCursorHidden)
     {
       if (isHideCursor)
@@ -104,6 +104,8 @@ namespace game
 
   void State::render()
   {
+    auto& color =
+        resources.settings.isUseCharacterColor && type == PLAY ? play.character.data.color : resources.settings.color;
     auto windowSize = resources.settings.windowSize;
 #ifndef __EMSCRIPTEN__
     SDL_GetWindowSize(window, &windowSize.x, &windowSize.y);
@@ -111,7 +113,7 @@ namespace game
 
     canvas.bind();
     canvas.size_set(windowSize);
-    canvas.clear(vec4(resources.settings.color, 1.0f));
+    canvas.clear(vec4(color, 1.0f));
     canvas.unbind();
 
     switch (type)
@@ -119,8 +121,8 @@ namespace game
       case SELECT:
         select.render(resources, canvas);
         break;
-      case MAIN:
-        main.render(resources, canvas);
+      case PLAY:
+        play.render(resources, canvas);
         break;
       default:
         break;

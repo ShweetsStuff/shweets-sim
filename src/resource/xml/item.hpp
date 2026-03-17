@@ -50,7 +50,7 @@ namespace game::resource::xml
       std::optional<float> digestionBonus{};
       std::optional<float> gravity{};
       std::optional<int> chewCount{};
-      bool isPlayReward{};
+      bool isSkillCheckReward{};
       bool isToggleSpritesheet{};
     };
 
@@ -85,7 +85,7 @@ namespace game::resource::xml
 
     std::vector<int> rarityIDsSortedByChance{};
     std::unordered_map<int, Pool> pools{};
-    Pool rewardItemPool{};
+    Pool skillCheckRewardItemPool{};
 
     Animations animations{};
     Sounds sounds{};

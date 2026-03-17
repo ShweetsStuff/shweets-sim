@@ -1,6 +1,7 @@
 #pragma once
 
 #include <filesystem>
+#include <glm/glm.hpp>
 #include <string>
 #include <vector>
 
@@ -22,6 +23,7 @@ namespace game::resource::xml
     Texture portrait{};
     Texture render{};
     Save save{};
+    glm::vec3 color{0.120f, 0.515f, 0.115f};
 
     int stages{1};
 

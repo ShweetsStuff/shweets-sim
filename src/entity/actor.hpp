@@ -2,7 +2,7 @@
 
 #include <unordered_set>
 
-#include "../canvas.hpp"
+#include "../render/canvas.hpp"
 #include "../resource/xml/anm2.hpp"
 
 namespace game::entity

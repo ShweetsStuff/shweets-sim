@@ -2,6 +2,7 @@
 
 #include "../../util/color.hpp"
 #include "../../util/imgui.hpp"
+#include "../../util/imgui/style.hpp"
 #include "../../util/imgui/widget.hpp"
 #include "../../util/vector.hpp"
 
@@ -18,6 +19,7 @@ namespace game::state::select
 
     auto& style = ImGui::GetStyle();
     auto viewport = ImGui::GetMainViewport();
+    auto& character = resources.characterPreviews[characterIndex];
 
     auto size = ImVec2(viewport->Size.x / 2.0f - (style.WindowPadding.x * 2.0f),
                        (viewport->Size.y / 2.0f) - (style.WindowPadding.y * 2.0f));
@@ -25,12 +27,12 @@ namespace game::state::select
 
     ImGui::SetNextWindowSize(size);
     ImGui::SetNextWindowPos(pos);
+    imgui::style::color_set(character.color);
 
     if (ImGui::Begin("##Info", nullptr,
                      ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse |
                          ImGuiWindowFlags_NoTitleBar))
     {
-      auto& character = resources.characterPreviews[characterIndex];
       auto& save = character.save;
       auto& system = resources.settings.measurementSystem;
       auto& weight = save.is_valid() ? save.weight : character.weight;
@@ -123,5 +125,6 @@ namespace game::state::select
       }
     }
     ImGui::End();
+    imgui::style::color_set(resources.settings.color);
   }
 }

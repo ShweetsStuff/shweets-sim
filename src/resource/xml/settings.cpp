@@ -23,8 +23,7 @@ namespace game::resource::xml
 
     if (document.LoadFile(pathString.c_str()) != XML_SUCCESS)
     {
-      logger.error(
-          std::format("Could not initialize character save file: {} ({})", pathString, document.ErrorStr()));
+      logger.error(std::format("Could not initialize character save file: {} ({})", pathString, document.ErrorStr()));
       return;
     }
 
@@ -34,13 +33,10 @@ namespace game::resource::xml
       query_string_attribute(root, "MeasurementSystem", &measurementSystemString);
       measurementSystem = measurementSystemString == "Imperial" ? measurement::IMPERIAL : measurement::METRIC;
       root->QueryIntAttribute("Volume", &volume);
-      root->QueryFloatAttribute("ColorR", &color.r);
-      root->QueryFloatAttribute("ColorG", &color.g);
-      root->QueryFloatAttribute("ColorB", &color.b);
-      root->QueryFloatAttribute("WindowX", &windowPosition.x);
-      root->QueryFloatAttribute("WindowY", &windowPosition.y);
-      root->QueryIntAttribute("WindowW", &windowSize.x);
-      root->QueryIntAttribute("WindowH", &windowSize.y);
+      query_vec3(root, "ColorR", "ColorG", "ColorB", color);
+      query_vec2(root, "WindowX", "WindowY", windowPosition);
+      query_ivec2(root, "WindowW", "WindowH", windowSize);
+      query_bool_attribute(root, "IsUseCharacterColor", &isUseCharacterColor);
     }
 
     logger.info(std::format("Initialized settings: {}", pathString));
@@ -59,13 +55,10 @@ namespace game::resource::xml
 
     element->SetAttribute("MeasurementSystem", measurementSystem == measurement::IMPERIAL ? "Imperial" : "Metric");
     element->SetAttribute("Volume", volume);
-    element->SetAttribute("ColorR", color.r);
-    element->SetAttribute("ColorG", color.g);
-    element->SetAttribute("ColorB", color.b);
-    element->SetAttribute("WindowX", windowPosition.x);
-    element->SetAttribute("WindowY", windowPosition.y);
-    element->SetAttribute("WindowW", windowSize.x);
-    element->SetAttribute("WindowH", windowSize.y);
+    set_vec3_attribute(element, "ColorR", "ColorG", "ColorB", color);
+    set_vec2_attribute(element, "WindowX", "WindowY", windowPosition);
+    set_ivec2_attribute(element, "WindowW", "WindowH", windowSize);
+    set_bool_attribute(element, "IsUseCharacterColor", isUseCharacterColor);
 
     document.InsertFirstChild(element);
 

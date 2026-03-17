@@ -21,6 +21,7 @@ namespace game::resource::xml
 
     util::measurement::System measurementSystem{util::measurement::METRIC};
     int volume{50};
+    bool isUseCharacterColor{true};
 
     glm::vec3 color{0.120f, 0.515f, 0.115f};
     glm::ivec2 windowSize{1600, 900};

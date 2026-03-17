@@ -1,14 +1,14 @@
 #pragma once
 
 #include "../../resources.hpp"
-#include "../configuration.hpp"
+#include "../settings_menu.hpp"
 
 namespace game::state::select
 {
   class Characters
   {
   public:
-    Configuration configuration;
+    SettingsMenu settingsMenu;
 
     void update(Resources&, int& characterIndex);
   };

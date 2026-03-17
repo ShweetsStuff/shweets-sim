@@ -142,7 +142,7 @@ namespace game::resource::xml
             query_int_optional_attribute(child, "UpgradeCount", item.upgradeCount);
           }
 
-          query_bool_attribute(child, "IsPlayReward", &item.isPlayReward);
+          query_bool_attribute(child, "IsSkillCheckReward", &item.isSkillCheckReward);
           query_bool_attribute(child, "IsToggleSpritesheet", &item.isToggleSpritesheet);
 
           std::string categoryString{};
@@ -173,7 +173,7 @@ namespace game::resource::xml
     {
       auto& item = items[i];
       pools[item.rarityID].emplace_back(i);
-      if (item.isPlayReward) rewardItemPool.emplace_back(i);
+      if (item.isSkillCheckReward) skillCheckRewardItemPool.emplace_back(i);
     }
 
     for (int i = 0; i < (int)rarities.size(); i++)

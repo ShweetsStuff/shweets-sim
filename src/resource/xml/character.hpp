@@ -3,7 +3,6 @@
 #include <filesystem>
 #include <vector>
 
-#include "../../util/interact_type.hpp"
 #include "../audio.hpp"
 #include "animation_entry.hpp"
 #include "anm2.hpp"
@@ -12,7 +11,7 @@
 #include "dialogue.hpp"
 #include "item.hpp"
 #include "menu.hpp"
-#include "play.hpp"
+#include "skill_check.hpp"
 #include "save.hpp"
 
 namespace game::resource::xml
@@ -51,7 +50,8 @@ namespace game::resource::xml
 
       int nullID{-1};
       int layerID{-1};
-      InteractType type{(InteractType)-1};
+      int typeID{-1};
+      bool isHold{};
       Dialogue::PoolReference pool{-1};
 
       float digestionBonusRub{};
@@ -97,7 +97,7 @@ namespace game::resource::xml
     Item itemSchema{};
     Menu menuSchema{};
     Cursor cursorSchema{};
-    Play playSchema{};
+    SkillCheck skillCheckSchema{};
 
     Save save{};
 
@@ -107,9 +107,12 @@ namespace game::resource::xml
 
     Sounds sounds{};
 
+    glm::vec3 color{0.120f, 0.515f, 0.115f};
+
     std::vector<Stage> stages{};
     std::vector<ExpandArea> expandAreas{};
     std::vector<EatArea> eatAreas{};
+    std::vector<std::string> interactTypeNames{};
     std::vector<InteractArea> interactAreas{};
 
     AlternateSpritesheet alternateSpritesheet{};

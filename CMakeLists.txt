@@ -109,10 +109,12 @@ set (TINYXML2_SOURCES ${TINYXML2_DIR}/tinyxml2.cpp)
 file(GLOB PROJECT_SRC CONFIGURE_DEPENDS
 	        include/*.cpp
 	        src/*.cpp
+	        src/render/*.cpp
 	        src/resource/*.cpp
 	        src/resource/xml/*.cpp
 	        src/state/*.cpp
-	        src/state/main/*.cpp
+	        src/state/play/*.cpp
+	        src/state/play/arcade/*.cpp
 	        src/state/select/*.cpp
 	        src/entity/*.cpp
 	        src/window/*.cpp

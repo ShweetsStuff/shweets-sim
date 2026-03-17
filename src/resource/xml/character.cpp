@@ -41,6 +41,8 @@ namespace game::resource::xml
       query_anm2(root, "Anm2", archive, textureRootPath, anm2);
       query_string_attribute(root, "Name", &name);
 
+      query_vec3(root, "ColorR", "ColorG", "ColorB", color);
+
       root->QueryFloatAttribute("Weight", &weight);
 
       root->QueryFloatAttribute("Capacity", &capacity);
@@ -159,6 +161,15 @@ namespace game::resource::xml
 
       if (auto element = root->FirstChildElement("InteractAreas"))
       {
+        auto interact_type_id_get = [&](const std::string& typeName)
+        {
+          for (int i = 0; i < (int)interactTypeNames.size(); i++)
+            if (interactTypeNames[i] == typeName) return i;
+
+          interactTypeNames.emplace_back(typeName);
+          return (int)interactTypeNames.size() - 1;
+        };
+
         for (auto child = element->FirstChildElement("InteractArea"); child;
              child = child->NextSiblingElement("InteractArea"))
         {
@@ -173,6 +184,7 @@ namespace game::resource::xml
           query_string_attribute(child, "AnimationCursorActive", &interactArea.animationCursorActive);
           query_sound_entry_collection(child, "Sound", archive, soundRootPath, interactArea.sound, "Path");
           dialogue.query_pool_id(child, "DialoguePoolID", interactArea.pool.id);
+          query_bool_attribute(child, "IsHold", &interactArea.isHold);
           child->QueryFloatAttribute("DigestionBonusRub", &interactArea.digestionBonusRub);
           child->QueryFloatAttribute("DigestionBonusClick", &interactArea.digestionBonusClick);
           child->QueryFloatAttribute("Time", &interactArea.time);
@@ -181,9 +193,7 @@ namespace game::resource::xml
 
           std::string typeString{};
           query_string_attribute(child, "Type", &typeString);
-
-          for (int i = 0; i < (int)std::size(INTERACT_TYPE_STRINGS); i++)
-            if (typeString == INTERACT_TYPE_STRINGS[i]) interactArea.type = (InteractType)i;
+          if (!typeString.empty()) interactArea.typeID = interact_type_id_get(typeString);
 
           interactAreas.emplace_back(std::move(interactArea));
         }
@@ -210,10 +220,10 @@ namespace game::resource::xml
     else
       logger.warning(std::format("No character cursor.xml file found: {}", path.string()));
 
-    if (auto playSchemaPath = physfs::Path(archive + "/" + "play.xml"); playSchemaPath.is_valid())
-      playSchema = Play(playSchemaPath, dialogue);
+    if (auto skillCheckSchemaPath = physfs::Path(archive + "/" + "skill_check.xml"); skillCheckSchemaPath.is_valid())
+      skillCheckSchema = SkillCheck(skillCheckSchemaPath, dialogue);
     else
-      logger.warning(std::format("No character play.xml file found: {}", path.string()));
+      logger.warning(std::format("No character skill_check.xml file found: {}", path.string()));
 
     logger.info(std::format("Initialized character: {}", name));
 

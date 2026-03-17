@@ -47,6 +47,7 @@ namespace game::entity
     std::vector<int> animationBlinkDurations{};
 
     bool isStageUp{};
+    bool isStageUpDuring{};
     bool isJustStageUp{};
     bool isJustStageFinal{};
 

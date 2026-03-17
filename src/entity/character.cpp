@@ -335,12 +335,14 @@ namespace game::entity
 
   void Character::queue_play(QueuedPlay play)
   {
+    if (isStageUp) return;
     queuedPlay = play;
     queuedPlay.animation = animation_name_convert(queuedPlay.animation);
   }
 
   void Character::queue_idle_animation()
   {
+    if (isStageUp) return;
     if (data.animations.idle.empty()) return;
     queue_play(
         {is_over_capacity() && !data.animations.idleFull.empty() ? data.animations.idleFull : data.animations.idle});
@@ -348,6 +350,7 @@ namespace game::entity
 
   void Character::queue_interact_area_animation(resource::xml::Character::InteractArea& interactArea)
   {
+    if (isStageUp) return;
     if (interactArea.animation.empty()) return;
     queue_play({is_over_capacity() && !interactArea.animationFull.empty() ? interactArea.animationFull
                                                                           : interactArea.animation});

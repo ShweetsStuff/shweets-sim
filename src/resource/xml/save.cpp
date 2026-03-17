@@ -22,15 +22,13 @@ namespace game::resource::xml
     XMLDocument document;
     auto pathString = path.string();
 
-    // Fail silently if there's no save.
     auto result = document.LoadFile(pathString.c_str());
 
     if (result == XML_ERROR_FILE_NOT_FOUND || result == XML_ERROR_FILE_COULD_NOT_BE_OPENED) return;
 
     if (result != XML_SUCCESS)
     {
-      logger.error(
-          std::format("Could not initialize character save file: {} ({})", pathString, document.ErrorStr()));
+      logger.error(std::format("Could not initialize character save file: {} ({})", pathString, document.ErrorStr()));
       return;
     }
 
@@ -54,7 +52,9 @@ namespace game::resource::xml
         element->QueryIntAttribute("TotalFoodItemsEaten", &totalFoodItemsEaten);
       }
 
-      if (auto element = root->FirstChildElement("Play"))
+      auto element = root->FirstChildElement("SkillCheck");
+      if (!element) element = root->FirstChildElement("Play");
+      if (element)
       {
         element->QueryIntAttribute("TotalPlays", &totalPlays);
         element->QueryIntAttribute("HighScore", &highScore);
@@ -130,13 +130,13 @@ namespace game::resource::xml
     characterElement->SetAttribute("TotalCaloriesConsumed", totalCaloriesConsumed);
     characterElement->SetAttribute("TotalFoodItemsEaten", totalFoodItemsEaten);
 
-    auto playElement = element->InsertNewChildElement("Play");
+    auto skillCheckElement = element->InsertNewChildElement("SkillCheck");
 
-    playElement->SetAttribute("TotalPlays", totalPlays);
-    playElement->SetAttribute("HighScore", highScore);
-    playElement->SetAttribute("BestCombo", bestCombo);
+    skillCheckElement->SetAttribute("TotalPlays", totalPlays);
+    skillCheckElement->SetAttribute("HighScore", highScore);
+    skillCheckElement->SetAttribute("BestCombo", bestCombo);
 
-    auto gradesElement = playElement->InsertNewChildElement("Grades");
+    auto gradesElement = skillCheckElement->InsertNewChildElement("Grades");
 
     for (auto& [i, count] : gradeCounts)
     {

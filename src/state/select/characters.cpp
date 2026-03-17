@@ -1,10 +1,9 @@
 #include "characters.hpp"
 
-#include <ranges>
-
+#include "../../util/imgui/style.hpp"
 #include "../../util/imgui/widget.hpp"
 
-using namespace game::util::imgui;
+using namespace game::util;
 
 namespace game::state::select
 {
@@ -39,6 +38,7 @@ namespace game::state::select
             ImGui::PushID(i);
 
             ImGui::SetCursorPos(cursorPos);
+            imgui::style::color_set(character.color);
 
             auto isSelected = i == characterIndex;
 
@@ -64,13 +64,14 @@ namespace game::state::select
             }
 
             ImGui::PopID();
+            imgui::style::color_set(resources.settings.color);
           }
           ImGui::EndTabItem();
         }
 
-        if (WIDGET_FX(ImGui::BeginTabItem("Configuration")))
+        if (WIDGET_FX(ImGui::BeginTabItem("Settings")))
         {
-          configuration.update(resources);
+          settingsMenu.update(resources);
           ImGui::EndTabItem();
         }
         ImGui::EndTabBar();

@@ -2,10 +2,10 @@
 
 #include <SDL3/SDL.h>
 
-#include "canvas.hpp"
+#include "render/canvas.hpp"
 #include "resources.hpp"
 
-#include "state/main.hpp"
+#include "state/play.hpp"
 #include "state/select.hpp"
 
 #include "entity/cursor.hpp"
@@ -22,7 +22,7 @@ namespace game
 
     enum Type
     {
-      MAIN,
+      PLAY,
       SELECT
     };
 
@@ -30,7 +30,7 @@ namespace game
 
     Resources resources;
 
-    state::Main main;
+    state::Play play;
     state::Select select;
 
     void tick();

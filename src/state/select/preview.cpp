@@ -4,6 +4,7 @@
 #include <cmath>
 
 #include "../../util/imgui.hpp"
+#include "../../util/imgui/style.hpp"
 #include "../../util/imgui/widget.hpp"
 #include "../../util/vector.hpp"
 
@@ -25,13 +26,14 @@ namespace game::state::select
 
     auto& style = ImGui::GetStyle();
     auto viewport = ImGui::GetMainViewport();
-
+    auto& character = resources.characterPreviews[characterIndex];
     auto size = ImVec2(viewport->Size.x / 2.0f - (style.WindowPadding.x * 2.0f),
                        (viewport->Size.y / 2.0f) - (style.WindowPadding.y * 2.0f));
     auto pos = ImVec2(style.WindowPadding.x, style.WindowPadding.y);
 
     ImGui::SetNextWindowSize(size);
     ImGui::SetNextWindowPos(pos);
+    imgui::style::color_set(character.color);
 
     if (ImGui::Begin("##Preview", nullptr,
                      ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse |
@@ -39,8 +41,6 @@ namespace game::state::select
     {
       if (ImGui::BeginTabBar("##Preview Tab Bar"))
       {
-        auto& character = resources.characterPreviews[characterIndex];
-
         auto available = ImGui::GetContentRegionAvail();
         auto availableSize = imgui::to_vec2(available);
         auto textureSize = vec2(character.render.size);
@@ -106,5 +106,6 @@ namespace game::state::select
       }
     }
     ImGui::End();
+    imgui::style::color_set(resources.settings.color);
   }
 }
