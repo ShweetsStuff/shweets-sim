@@ -92,7 +92,6 @@ namespace game::resource::xml
           Item item{};
           child->QueryIntAttribute("ID", &item.id);
           child->QueryIntAttribute("Durability", &item.durability);
-          if (child->FindAttribute("ChewCount")) child->QueryIntAttribute("ChewCount", &item.durability);
           child->QueryFloatAttribute("PositionX", &item.position.x);
           child->QueryFloatAttribute("PositionY", &item.position.y);
           child->QueryFloatAttribute("VelocityX", &item.velocity.x);

@@ -14,7 +14,15 @@ My process for making characters is that they're typically comprised of many "ce
 
 If you'd like a quick primer on how to use either program, check either of [these](https://www.youtube.com/watch?v=qU_GMo2l7NY) [videos](https://www.youtube.com/watch?v=QiXVM6Gwzlw) out. Much of the information is interchangeable between the programs, though both are a little out of date on their current version.
 
-For each "stage" of the character (graphical change), an animation equivalent will be expected. Stages are zero-indexed in this context; so the first stage would be 0. If you have an idle animation and want that for the first, starting stage, you'd need to name the animation "Idle0", for example, and then reference that in character.xml (more on that later). Don't manually input the number for the animation in any file, just put in the first part, "Idle"; the game will handle which stage-animation plays when.
+Stage-specific character animations are controlled by `AnimationAppendID` on each stage in `character.xml`. The base stage uses no suffix. Later stages append that stage's configured suffix.
+
+Example:
+
+- stage 1: `Look`
+- stage 2 with `AnimationAppendID="Stage2"`: `LookStage2`
+- stage 5 with `AnimationAppendID="Stage5"`: `LookStage5`
+
+Animation references in XML should still use just the base name like `Look`, `Neutral`, or `Eat`. The game appends the current stage's suffix automatically.
 
 Know that despite Anm2Ed supporting sounds for animations, don't expect these to work in context based on names; use the .xml sound attributes when applicable. You can add sounds for fluff, though.
 
@@ -26,7 +34,7 @@ There's two folders inside resources; "characters" and "font".
 
 EVERYTHING ELSE is stored inside bespoke character archives (.zips) in the "characters" folder. This has all data associated with characters. Think of characters more as tailored game experiences rather than literally being just the characters. Not only is there the character graphics, but backgrounds, items, parameters, etc. These are intensely customizable to suit whatever experience you'd like (within the confines of the engine, of course).
 
-Shweet's Sim uses a collection of [XML](https://en.wikipedia.org/wiki/XML) files to parse data; make sure to brush up on the format. The engine can expect six files in the archive's root: 
+Shweet's Sim uses a collection of [XML](https://en.wikipedia.org/wiki/XML) files to parse data; make sure to brush up on the format. A character archive can contain these files in its root:
 
 - areas.xml
 - character.xml
@@ -34,9 +42,10 @@ Shweet's Sim uses a collection of [XML](https://en.wikipedia.org/wiki/XML) files
 - dialogue.xml
 - items.xml
 - menu.xml
+- strings.xml
 - skill_check.xml
 
-(dialogue.xml may or may not be optional; but in future updates I'll make sure of it, for dialogueless characters).
+The game currently expects `character.xml`. The rest are optional in the sense that the loader will warn and continue if some are missing, but most real characters will want nearly all of them.
 
 If you're making your own character, your best bet would probably be just to copy the Snivy character and edit it based on your needs, just as a helpful start.
 
@@ -56,8 +65,6 @@ The file path of the area's texture (background).
 Gravity the area has; applies to items' velocities per tick.
 #### Friction (float)
 Friction of the area; applies to items' velocities when grounded or hitting walls.
-#### AirResistance (float)
-Air resistance of the area; applies to items' velocities when airborne.
 
 ## character.xml
 This is the main character file where much of the functionality is stored.
@@ -77,42 +84,50 @@ Texture for the character's "portrait" (i.e., a cropped profile view), will show
 Character's "anm2" file (uses TextureRootPath); should have all the character's animations.
 #### Description (string)
 A general description of the character; will show in the Select screen.
-#### Author (string)
-The author of the character.
-#### Weight (float, kilograms)
+#### Credits (string)
+Credits text shown in the Select screen's Credits tab.
+#### Weight (double, kilograms)
 The character's starting weight, in kilograms.
-#### Capacity (float, calories)
+#### WeightMax (double, kilograms)
+Maximum weight the character can reach.
+#### Capacity (double, calories)
 The character's starting capacity, in calories.
-#### CapacityMin (float, calories)
+#### CapacityMin (double, calories)
 The character's minimum capacity, in calories.
-#### CapacityMax (float, calories)
-The character's maximum capacity, in calories. Know that max capacity is determined by Capacity * CapacityMaxMultiplier; this determines the max of the "base" capacity.
-#### CapacityMaxMultiplier (float)
-Determines the effective max capacity; will be capacity times this number.
-#### CapacityIfOverStuffedOnDigestBonus (float, percent)
-When a character is over stuffed (i.e., over base capacity), the character will an additional capacity when digesting based on how overstuffed they are, based on how many calories over the base capacity.
-#### CaloriesToKilogram (float)
+#### CapacityMax (double, calories)
+Maximum base capacity.
+#### CapacityMaxMultiplier (double)
+Multiplier used when computing the effective full threshold from current base capacity.
+#### CapacityIfOverStuffedOnDigestBonus (double, multiplier)
+Additional capacity gained on digest when the character was over base capacity.
+#### CaloriesToKilogram (double)
 Determines how many calories become a kilogram (1 cal -> X kg).
-#### DigestionRate (float, percent/tick)
+#### DigestionRate (double, percent/tick)
 The base digestion rate, in percent per tick (60 ticks per second).
-#### DigestionRateMin (float, percent/tick)
+#### DigestionRateMin (double, percent/tick)
 The minimum digestion rate for the character, in percent per tick.
-#### DigestionRateMax (float, percent/tick)
+#### DigestionRateMax (double, percent/tick)
 The maximum digestion rate for the character, in percent per tick.
 #### DigestionTimerMax (int, ticks)
 When digesting, the digestion bar will count down, and then when it hits 0, the current calories will be digested. This determines how long this takes, in ticks.
-#### EatSpeed (float)
+#### EatSpeed (double)
 A multiplier that speeds/slows down the eating animation, at base.
-#### EatSpeedMin (float)
+#### EatSpeedMin (double)
 Determines the minimum eating speed multiplier.
-#### EatSpeedMax (float)
+#### EatSpeedMax (double)
 Determines the maximum eating speed multiplier.
-#### GurgleChance (float, percent)
+#### BlinkChance (double, percent)
+Chance each tick to trigger a blink override.
+#### GurgleChance (double, percent)
 Determines how often the character will gurgle (see the Gurgle sounds later) per tick. 
-#### GurgleCapacityMultiplier (float)
+#### GurgleCapacityMultiplier (double)
 Per the character's capacity, multiplies the character's gurgle chance based on the percent of capacity filled (based on max capacity). Higher capacity = higher gurgle chance, using this number at maximum.
+#### TextBlipPeriodBase (int)
+How many displayed dialogue characters elapse between blip sounds. `3` means every third displayed character.
 #### DialoguePoolID (string)
 Determines the character's base dialogue options (for the "How are you feeling?" option in Chat). This is effectively "Stage 1"'s dialogue; each stage should have its own dialogue pool (see later). Also see dialogue.xml for how "Pools" work.
+#### ColorR, ColorG, ColorB (float, 0-1)
+UI accent color for the character.
 ### AlternateSpritesheet
 Determines the alternate spritesheet of the character, if applicable (in Pokemon terms, the "shiny").
 #### Texture (path)
@@ -127,8 +142,12 @@ Chance of rolling for the alternate spritesheet on starting a new game, in perce
 A "stage" represents each visual change of the character as the weight increases. By default, there's always one stage; adding more here will add additional stages.
 #### Threshold (float, kilograms)
 The weight threshold to reach this stage, in kilograms.
+#### AreaID (int)
+Reserved for background switching. Parsed, but not currently used by gameplay.
 #### DialoguePoolID (string)
 Determines the stage's dialogue options (for the "How are you feeling?" option in Chat). Also see dialogue.xml for how "Pools" work.
+#### AnimationAppendID (string)
+Suffix appended to base animation names while this stage is active. Usually `Stage2`, `Stage3`, etc.
 ### Animations
 The character's animations. Know that a lot of character animations are typically easily played/activated through Dialogue; this is just for animations that aren't reliant on that system. Know that _these animations should just be the base name_; all animations are expected to have a stage number after them, so don't include the number for these.
 ### Start
@@ -174,22 +193,36 @@ The areas on a character which can be interacted with; usually for belly rubs, k
 Three types are presently hard-coded in, but this is kind of hacky and custom support for different interactions may later be added. The cursor will need to be set from the "Tools" in order for each interact area to be activated.
 #### Null (string)
 The null in which the interact area can be triggered. Again, review the .anm2 format.
-#### Animation (string)
-The animation that will play when the interact area is activated (hovering and clicking).
-#### AnimationFull (string)
-The above, but when character is full.
+#### Layer (string; optional)
+Layer used for scale-effect interactions such as smacks.
 #### AnimationCursorHover (string)
 The animation the cursor will play when hovering over the interact area. 
 #### AnimationCursorActive (string)
 The animation the cursor will play when holding down click over the interact area.
 #### DialoguePoolID (string)
 The dialogue pool which will be drawn from when activating an interact area (see dialogue.xml).
+#### DialoguePoolIDFull (string)
+Dialogue pool used when the character is over capacity.
+#### IsHold (bool)
+If true, the interaction is held rather than clicked once.
+#### DigestionBonusRub (float)
+Digestion bonus applied repeatedly while rubbing.
+#### DigestionBonusClick (float)
+Digestion bonus applied when a click-based interaction lands.
+#### Time (float)
+Used by click effects such as smacks.
+#### ScaleEffectAmplitude (float)
+Visual scale effect amount for click interactions.
+#### ScaleEffectCycles (float)
+How many oscillations the scale effect performs.
 ### Sound
 An interact area can play multiple sounds when interacting; add additional Sound elements to achieve this. Don't worry about repeatedly-loaded sounds; the game will cache them beforehand for efficiency.
 #### Path (path)
 The path of the sound being used.
 ### Sounds
 Sounds that play in some contexts.
+### Blip
+Dialogue blip sounds. One is played periodically while text reveals.
 ### Digest
 Sounds that will play when the character begins digesting (digestion bar full).
 ### Gurgle
@@ -336,7 +369,7 @@ Working folder/directory of where used sounds will be contained within.
 The base anm2 file that items will use. Items can technically have their own .anm2 and animate accordingly, but I haven't tested this much.
 ### Animations
 ### Chew
-When items are chewed, play this animation. Items can have chew counts and the animation will adapt accordingly, so be sure to have chew animations for chew counts; 1 chew = Chew1, 2 chew = Chew2, etc. 
+When items are chewed, play this animation family. The game looks for `Chew0`, `Chew1`, `Chew2`, and so on inside the item's `.anm2`.
 #### Animation (string)
 The name of the animation. Only the base part ("Chew", usually)
 ### Sounds
@@ -375,19 +408,25 @@ Different rarities of item. Shows in inventory and each can have their own drop 
 #### Name (string)
 Name of the rarity.
 #### Chance (float, percent)
-Base chance of finding an item, per winning a play of the "play" game. See play.xml for how this is modified.
+Base chance of finding an item in the Skill Check reward logic.
 #### Sound (path)
-Sound that will play when an item is found in the "play" game.
+Sound that will play when an item is found in the Skill Check minigame.
 #### IsHidden (bool)
 If true, items with this rarity will not be previewed in the inventory, unlesss possessed. Assumed false if not present.
 ### Items
 #### TextureRootPath (path)
 Working folder/directory of where used item textures will be contained within.
-#### ChewCount (int)
-Base chew count for items; will be chewed this many times before being erased.
-Chew count will determine how many calories/digestion bonus/etc. are given per bite (0 chew = all, 2 chew = divided by 3) 
-#### SpritesheetID (int)
-Item textures will use this spritesheet ID on the base anm2.
+#### Durability (int)
+Base durability for items.
+
+Durability means "number of bites before deletion."
+
+Example with `Durability="3"`:
+
+- `Chew0`: untouched
+- `Chew1`: after one bite
+- `Chew2`: after two bites
+- removed after the third bite
 #### QuantityMax (int)
 How many items of a type can be possessed at once.
 ### Item
@@ -408,22 +447,30 @@ The custom anm2 the item uses, if needed.
 The flavor the item uses; as defined in Flavors.
 #### Calories (float; optional)
 The amount of calories in an item has (if food).
+#### CapacityBonus (float; optional)
+Capacity increase granted as the item is eaten.
 #### DigestionBonus (float, percent; optional)
 The additional digestion rate in percent the item will give if eaten.
 #### EatSpeedBonus (float; optional)
 The additional eat speed multiplier the item will give if eaten.
 #### Gravity (float; optional)
 The item's gravity; will use the default gravity if not available.
-#### ChewCount (int; optional)
-An item's custom chew count.
+#### Durability (int; optional)
+Custom durability override for the item.
+#### ColorR, ColorG, ColorB (float, 0-1; optional)
+Optional item UI color. Missing components default to `0` if any color component is provided.
 #### UpgradeID (string; optional)
 The name of another item that this item will be able to be upgraded to.
 #### UpgradeCount (int; optional)
 The amount of this item it will take to upgrade to the upgrade item specified in UpgradeID.
-#### IsPlayReward (bool; optional)
-The item will be given out when the reward is hit in play (see play.xml)
+#### IsSkillCheckReward (bool; optional)
+The item can be given as a Skill Check reward.
 #### IsToggleSpritesheet (bool; optional)
 When used in the inventory, will toggle the character's spritesheet (in Pokemon terms, toggling normal/shiny palettes).
+
+## strings.xml
+Character-specific text strings.
+See [`src/resource/xml/strings.hpp`](src/resource/xml/strings.hpp) for how strings map to in-game displays.
 
 ## menu.xml
 Determines menu and general UI appearance and behavior.
@@ -467,7 +514,7 @@ Determines behavior and appearance of the "Skill Check" minigame.
 #### SoundRootPath (path)
 Working folder/directory of where used sounds will be contained within.
 #### RewardScore (int)
-The play score where a rewarded item will be given (see items.xml)
+The score where a rewarded item will be given (see items.xml)
 #### RewardScoreBonus (float, percent)
 Based on the player's score, will add additional bonus to being rewarded items.
 #### RewardGradeBonus (float, percent)
@@ -487,7 +534,7 @@ Really a negative. The range size will decrease this much per point of score.
 #### EndTimerMax (int)
 The period of time between plays of the minigame.
 #### EndTimerFailureMax (int)
-When a player fails (no ranges hit), the minigame will pause fo this amount of time, until restarting.
+When a player fails (no ranges hit), the minigame will pause for this amount of time before restarting.
 ### Sounds
 ### Fall
 The sound that plays when an item falls from being rewarded.
@@ -576,15 +623,15 @@ Total calories consumed by the character, per save file.
 How many food items have been completely consumed by the character, per save file.
 ### SkillCheck
 #### TotalPlays (int)
-However many times the "play" game has been attempted (hitting the bar counts as one "play")
+How many times the Skill Check minigame has been attempted.
 #### HighScore (int)
-Highest score the player has achieved in the "play" game.
+Highest score the player has achieved in the Skill Check minigame.
 #### BestCombo (int)
 Highest combo the player has achieved (how many successful hits the player has gotten in one session)
 #### Grades
 Play grades are the ratings the game gives based on where the player hit.
 ##### ID (int)
-ID of grade being tracked (see play.xml)
+ID of grade being tracked (see skill_check.xml)
 ##### Count (int)
 How many times the grade has been hit.
 
@@ -594,6 +641,18 @@ Items.
 ID of item being tracked (see items.xml)
 #### Quantity (int)
 Count of the item.
+### Items
+World items currently spawned outside the inventory.
+#### ID (int)
+Item ID from `items.xml`.
+#### Durability (int)
+Current bite progress for that spawned item.
+#### PositionX, PositionY (float)
+World position.
+#### VelocityX, VelocityY (float)
+World velocity.
+#### Rotation (float)
+Current rotation.
 
 
 # Conclusion
