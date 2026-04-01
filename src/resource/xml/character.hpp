@@ -11,8 +11,9 @@
 #include "dialogue.hpp"
 #include "item.hpp"
 #include "menu.hpp"
-#include "skill_check.hpp"
 #include "save.hpp"
+#include "skill_check.hpp"
+#include "strings.hpp"
 
 namespace game::resource::xml
 {
@@ -24,6 +25,7 @@ namespace game::resource::xml
       float threshold{};
       int areaID{};
       Dialogue::PoolReference pool{-1};
+      std::string animationAppendID{};
     };
 
     struct EatArea
@@ -42,8 +44,6 @@ namespace game::resource::xml
 
     struct InteractArea
     {
-      std::string animation{};
-      std::string animationFull{};
       std::string animationCursorActive{};
       std::string animationCursorHover{};
       SoundEntryCollection sound{};
@@ -53,6 +53,7 @@ namespace game::resource::xml
       int typeID{-1};
       bool isHold{};
       Dialogue::PoolReference pool{-1};
+      Dialogue::PoolReference poolFull{-1};
 
       float digestionBonusRub{};
       float digestionBonusClick{};
@@ -73,6 +74,7 @@ namespace game::resource::xml
 
     struct Sounds
     {
+      SoundEntryCollection blip{};
       SoundEntryCollection gurgle{};
       SoundEntryCollection digest{};
     };
@@ -98,6 +100,7 @@ namespace game::resource::xml
     Menu menuSchema{};
     Cursor cursorSchema{};
     SkillCheck skillCheckSchema{};
+    Strings strings{};
 
     Save save{};
 
@@ -119,23 +122,25 @@ namespace game::resource::xml
 
     std::string name{};
     std::filesystem::path path{};
-    float weight{50};
-    float capacity{2000.0f};
-    float capacityMin{2000.0f};
-    float capacityMax{99999.0f};
-    float capacityMaxMultiplier{1.5f};
-    float capacityIfOverStuffedOnDigestBonus{0.25f};
-    float caloriesToKilogram{1000.0f};
-    float digestionRate{0.05f};
-    float digestionRateMin{0.0f};
-    float digestionRateMax{0.25f};
+    double weight{50};
+    double weightMax{1000};
+    double capacity{2000.0};
+    double capacityMin{2000.0};
+    double capacityMax{99999.0};
+    double capacityMaxMultiplier{1.5};
+    double capacityIfOverStuffedOnDigestBonus{0.25};
+    double caloriesToKilogram{1000.0};
+    double digestionRate{0.05};
+    double digestionRateMin{0.0};
+    double digestionRateMax{0.25};
     int digestionTimerMax{60};
-    float eatSpeed{1.0f};
-    float eatSpeedMin{1.0f};
-    float eatSpeedMax{3.0f};
-    float blinkChance{1.0f};
-    float gurgleChance{1.0f};
-    float gurgleCapacityMultiplier{1.0f};
+    int textBlipPeriodBase{3};
+    double eatSpeed{1.0};
+    double eatSpeedMin{1.0};
+    double eatSpeedMax{3.0};
+    double blinkChance{1.0};
+    double gurgleChance{1.0};
+    double gurgleCapacityMultiplier{1.0};
     Dialogue::PoolReference pool{-1};
 
     Character() = default;

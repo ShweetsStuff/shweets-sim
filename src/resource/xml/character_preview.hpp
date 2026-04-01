@@ -28,7 +28,7 @@ namespace game::resource::xml
     int stages{1};
 
     std::string name{};
-    std::string author{};
+    std::string credits{};
     std::string description{};
     std::filesystem::path path{};
     float weight{50};

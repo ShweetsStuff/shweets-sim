@@ -22,10 +22,10 @@ namespace game::entity
     auto& save = data.save;
     auto saveIsValid = save.is_valid();
 
-    capacity = saveIsValid ? save.capacity : data.capacity;
-    weight = saveIsValid ? save.weight : data.weight;
-    digestionRate = saveIsValid ? save.digestionRate : data.digestionRate;
-    eatSpeed = saveIsValid ? save.eatSpeed : data.eatSpeed;
+    capacity = saveIsValid ? save.capacity : (double)data.capacity;
+    weight = saveIsValid ? save.weight : (double)data.weight;
+    digestionRate = saveIsValid ? save.digestionRate : (double)data.digestionRate;
+    eatSpeed = saveIsValid ? save.eatSpeed : (double)data.eatSpeed;
 
     calories = saveIsValid ? save.calories : 0;
 
@@ -77,7 +77,7 @@ namespace game::entity
 
   float Character::weight_get(measurement::System system)
   {
-    return system == measurement::IMPERIAL ? weight * (float)measurement::KG_TO_LB : weight;
+    return system == measurement::IMPERIAL ? weight * (double)measurement::KG_TO_LB : weight;
   }
 
   int Character::stage_from_weight_get(float checkWeight) const
@@ -99,7 +99,7 @@ namespace game::entity
   {
     if (stageIndex == -1) stageIndex = this->stage;
 
-    float threshold = data.weight;
+    double threshold = data.weight;
 
     if (!data.stages.empty())
     {
@@ -111,7 +111,7 @@ namespace game::entity
         threshold = data.stages[stageIndex - 1].threshold;
     }
 
-    return system == measurement::IMPERIAL ? threshold * (float)measurement::KG_TO_LB : threshold;
+    return system == measurement::IMPERIAL ? threshold * (double)measurement::KG_TO_LB : threshold;
   }
 
   float Character::stage_threshold_next_get(measurement::System system) const
@@ -122,23 +122,35 @@ namespace game::entity
   float Character::stage_progress_get()
   {
     auto currentStage = stage_get();
-    if (currentStage >= stage_max_get()) return 1.0f;
+    if (currentStage >= stage_max_get()) return 1.0;
 
     auto currentThreshold = stage_threshold_get(currentStage);
     auto nextThreshold = stage_threshold_get(currentStage + 1);
-    if (nextThreshold <= currentThreshold) return 1.0f;
+    if (nextThreshold <= currentThreshold) return 1.0;
 
     return (weight - currentThreshold) / (nextThreshold - currentThreshold);
   }
 
-  float Character::digestion_rate_get() { return digestionRate * 60; }
+  float Character::digestion_rate_get() { return digestionRate * 60.0; }
 
   float Character::max_capacity() const { return capacity * data.capacityMaxMultiplier; }
   bool Character::is_over_capacity() const { return calories > capacity; }
   bool Character::is_max_capacity() const { return calories >= max_capacity(); }
   float Character::capacity_percent_get() const { return calories / max_capacity(); }
 
-  std::string Character::animation_name_convert(const std::string& name) { return std::format("{}{}", name, stage); }
+  std::string Character::animation_append_id_get() const
+  {
+    if (stage <= 0) return {};
+    auto stageIndex = stage - 1;
+    if (stageIndex < 0 || stageIndex >= (int)data.stages.size()) return {};
+    return data.stages[stageIndex].animationAppendID;
+  }
+
+  std::string Character::animation_name_convert(const std::string& name)
+  {
+    auto appendID = animation_append_id_get();
+    return appendID.empty() ? name : name + appendID;
+  }
   void Character::play_convert(const std::string& animation, Mode playMode, float startAtTime,
                                float speedMultiplierValue)
   {
@@ -148,9 +160,8 @@ namespace game::entity
   void Character::expand_areas_apply()
   {
     auto stageProgress = stage_progress_get();
-    auto capacityProgress = isDigesting
-                                ? (float)calories / max_capacity() * (float)digestionTimer / data.digestionTimerMax
-                                : calories / max_capacity();
+    auto capacityProgress = isDigesting ? (double)calories / max_capacity() * (double)digestionTimer / data.digestionTimerMax
+                                        : calories / max_capacity();
 
     for (int i = 0; i < (int)data.expandAreas.size(); i++)
     {
@@ -158,8 +169,8 @@ namespace game::entity
       auto& overrideLayer = overrides[expandAreaOverrideLayerIDs[i]];
       auto& overrideNull = overrides[expandAreaOverrideNullIDs[i]];
 
-      auto stageScaleAdd = ((expandArea.scaleAdd * stageProgress) * 0.5f);
-      auto capacityScaleAdd = ((expandArea.scaleAdd * capacityProgress) * 0.5f);
+      auto stageScaleAdd = ((double)expandArea.scaleAdd * stageProgress) * 0.5;
+      auto capacityScaleAdd = ((double)expandArea.scaleAdd * capacityProgress) * 0.5;
 
       auto scaleAdd =
           glm::clamp(glm::vec2(), glm::vec2(stageScaleAdd + capacityScaleAdd), glm::vec2(expandArea.scaleAdd));
@@ -201,20 +212,21 @@ namespace game::entity
       if (digestionTimer <= 0)
       {
         auto increment = calories * data.caloriesToKilogram;
+        auto nextWeight = glm::clamp(weight + increment, data.weight, data.weightMax);
 
         if (is_over_capacity())
         {
           auto capacityMaxCalorieDifference = (calories - capacity);
           auto overCapacityPercent = capacityMaxCalorieDifference / (max_capacity() - capacity);
           auto capacityIncrement =
-              (overCapacityPercent * data.capacityIfOverStuffedOnDigestBonus) * capacityMaxCalorieDifference;
-          capacity = glm::clamp(data.capacityMin, capacity + capacityIncrement, data.capacityMax);
+              (double)((overCapacityPercent * data.capacityIfOverStuffedOnDigestBonus) * capacityMaxCalorieDifference);
+          capacity = glm::clamp(capacity + capacityIncrement, (double)data.capacityMin, (double)data.capacityMax);
         }
 
         totalCaloriesConsumed += calories;
         calories = 0;
 
-        if (auto nextStage = stage_from_weight_get(weight + increment); nextStage > stage_from_weight_get(weight))
+        if (auto nextStage = stage_from_weight_get((double)nextWeight); nextStage > stage_from_weight_get(weight))
         {
           queuedPlay = QueuedPlay{};
           nextQueuedPlay = QueuedPlay{};
@@ -226,7 +238,7 @@ namespace game::entity
         else
           isJustDigested = true;
 
-        weight += increment;
+        weight = (double)nextWeight;
 
         isDigesting = false;
         digestionTimer = data.digestionTimerMax;
@@ -258,7 +270,7 @@ namespace game::entity
       auto talk_reset = [&]()
       {
         isTalking = false;
-        talkTimer = 0.0f;
+        talkTimer = 0.0;
         talkOverride.frame = FrameOptional();
       };
 
@@ -277,9 +289,9 @@ namespace game::entity
           talkOverride.frame.size = frame.size;
           talkOverride.frame.pivot = frame.pivot;
 
-          talkTimer += 1.0f;
+          talkTimer += 1.0;
 
-          if (talkTimer > animationTalkDurations.at(animationIndex)) talkTimer = 0.0f;
+          if (talkTimer > animationTalkDurations.at(animationIndex)) talkTimer = 0.0;
         }
         else
           talk_reset();
@@ -301,7 +313,7 @@ namespace game::entity
         auto blink_reset = [&]()
         {
           isBlinking = false;
-          blinkTimer = 0.0f;
+          blinkTimer = 0.0;
           blinkOverride.frame = FrameOptional();
         };
 
@@ -320,7 +332,7 @@ namespace game::entity
             blinkOverride.frame.size = frame.size;
             blinkOverride.frame.pivot = frame.pivot;
 
-            blinkTimer += 1.0f;
+            blinkTimer += 1.0;
 
             if (blinkTimer >= blinkDuration) blink_reset();
           }
@@ -346,14 +358,6 @@ namespace game::entity
     if (data.animations.idle.empty()) return;
     queue_play(
         {is_over_capacity() && !data.animations.idleFull.empty() ? data.animations.idleFull : data.animations.idle});
-  }
-
-  void Character::queue_interact_area_animation(resource::xml::Character::InteractArea& interactArea)
-  {
-    if (isStageUp) return;
-    if (interactArea.animation.empty()) return;
-    queue_play({is_over_capacity() && !interactArea.animationFull.empty() ? interactArea.animationFull
-                                                                          : interactArea.animation});
   }
 
   void Character::spritesheet_set(SpritesheetType type)

@@ -47,38 +47,51 @@ namespace game::state::select
         ImGui::TextUnformatted(character.name.c_str());
         ImGui::PopFont();
 
-        if (!character.description.empty())
-        {
-          ImGui::Separator();
-
-          ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetColorU32(imgui::to_imvec4(color::GRAY)));
-          ImGui::PushFont(ImGui::GetFont(), Font::BIG);
-          ImGui::TextWrapped("%s", character.description.c_str());
-          ImGui::PopFont();
-
-          ImGui::PopStyleColor();
-        }
-
-        ImGui::Separator();
-
-        ImGui::PushFont(ImGui::GetFont(), Font::BIG);
-
-        ImGui::Text("Weight: %0.2f %s", system == IMPERIAL ? weight * KG_TO_LB : weight,
-                    system == IMPERIAL ? "lbs" : "kg");
-        ImGui::Text("Stages: %i", character.stages);
-
-        ImGui::Separator();
-
-        ImGui::PopFont();
-
         ImGui::PushFont(ImGui::GetFont(), Font::NORMAL);
+        if (ImGui::BeginTabBar("##Preview Tabs"))
+        {
+          if (ImGui::BeginTabItem("Overview"))
+          {
+            if (!character.description.empty())
+            {
+              ImGui::Separator();
 
-        ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetColorU32(imgui::to_imvec4(color::GRAY)));
+              ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetColorU32(imgui::to_imvec4(color::GRAY)));
+              ImGui::PushFont(ImGui::GetFont(), Font::HEADER_2);
+              ImGui::TextWrapped("%s", character.description.c_str());
+              ImGui::PopFont();
 
-        if (!character.author.empty()) ImGui::TextWrapped("Author: %s", character.author.c_str());
+              ImGui::PopStyleColor();
+            }
 
-        ImGui::PopStyleColor();
+            ImGui::Separator();
 
+            ImGui::PushFont(ImGui::GetFont(), Font::HEADER_2);
+
+            ImGui::Text("Weight: %0.2f %s", system == IMPERIAL ? weight * KG_TO_LB : weight,
+                        system == IMPERIAL ? "lbs" : "kg");
+            ImGui::Text("Stages: %i", character.stages);
+
+            ImGui::PopFont();
+            ImGui::EndTabItem();
+          }
+
+          if (ImGui::BeginTabItem("Credits"))
+          {
+            ImGui::Separator();
+            ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetColorU32(imgui::to_imvec4(color::GRAY)));
+            ImGui::PushFont(ImGui::GetFont(), Font::HEADER_2);
+            if (!character.credits.empty())
+              ImGui::TextWrapped("%s", character.credits.c_str());
+            else
+              ImGui::TextUnformatted("No credits listed.");
+            ImGui::PopFont();
+            ImGui::PopStyleColor();
+            ImGui::EndTabItem();
+          }
+
+          ImGui::EndTabBar();
+        }
         ImGui::PopFont();
       }
       ImGui::EndChild();

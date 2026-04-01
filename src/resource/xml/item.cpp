@@ -110,7 +110,8 @@ namespace game::resource::xml
         std::string itemTextureRootPath{};
         query_string_attribute(element, "TextureRootPath", &itemTextureRootPath);
 
-        element->QueryIntAttribute("ChewCount", &chewCount);
+        element->QueryIntAttribute("Durability", &durability);
+        if (element->FindAttribute("ChewCount")) element->QueryIntAttribute("ChewCount", &durability);
         element->QueryIntAttribute("QuantityMax", &quantityMax);
 
         for (auto child = element->FirstChildElement("Item"); child; child = child->NextSiblingElement("Item"))
@@ -121,11 +122,14 @@ namespace game::resource::xml
           query_string_attribute(child, "Description", &item.description);
 
           query_float_optional_attribute(child, "Calories", item.calories);
+          query_float_optional_attribute(child, "CapacityBonus", item.capacityBonus);
+          query_optional_vec3(child, "ColorR", "ColorG", "ColorB", item.color);
           query_float_optional_attribute(child, "DigestionBonus", item.digestionBonus);
           query_float_optional_attribute(child, "EatSpeedBonus", item.eatSpeedBonus);
           query_float_optional_attribute(child, "Gravity", item.gravity);
 
-          query_int_optional_attribute(child, "ChewCount", item.chewCount);
+          query_int_optional_attribute(child, "Durability", item.durability);
+          if (!item.durability.has_value()) query_int_optional_attribute(child, "ChewCount", item.durability);
 
           if (child->FindAttribute("UpgradeID"))
           {

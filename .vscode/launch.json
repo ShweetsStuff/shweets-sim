@@ -6,7 +6,7 @@
       "type": "cppdbg",
       "request": "launch",
       "preLaunchTask": "cmake: build debug",
-      "program": "${workspaceFolder}/out/build/linux-debug/bin/Debug/snivy",
+      "program": "${workspaceFolder}/out/build/linux-debug/bin/Debug/shweets-sim",
       "args": [],
       "stopAtEntry": false,
       "cwd": "${workspaceFolder}/out/build/linux-debug/bin/Debug",
@@ -26,7 +26,7 @@
       ],
       "windows": {
         "type": "cppvsdbg",
-        "program": "${workspaceFolder}/out/build/x64-Debug/bin/Debug/snivy.exe",
+        "program": "${workspaceFolder}/out/build/x64-Debug/bin/Debug/shweets-sim.exe",
         "cwd": "${workspaceFolder}/out/build/x64-Debug/bin/Debug"
       }
     },
@@ -36,7 +36,7 @@
       "request": "launch",
       "noDebug": true,
       "preLaunchTask": "cmake: build release",
-      "program": "${workspaceFolder}/out/build/linux-release/bin/Release/snivy",
+      "program": "${workspaceFolder}/out/build/linux-release/bin/Release/shweets-sim",
       "args": [],
       "cwd": "${workspaceFolder}/out/build/linux-release/bin/Release",
       "environment": [],
@@ -45,7 +45,7 @@
       "miDebuggerPath": "/usr/bin/gdb",
       "windows": {
         "type": "cppvsdbg",
-        "program": "${workspaceFolder}/out/build/x64-Release/bin/Release/snivy.exe",
+        "program": "${workspaceFolder}/out/build/x64-Release/bin/Release/shweets-sim.exe",
         "cwd": "${workspaceFolder}/out/build/x64-Release/bin/Release"
       }
     },

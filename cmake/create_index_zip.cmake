@@ -2,7 +2,7 @@ if(NOT DEFINED BIN_DIR OR BIN_DIR STREQUAL "")
     message(FATAL_ERROR "BIN_DIR is required")
 endif()
 
-set(ARCHIVE_PATH "${BIN_DIR}/snivy-web.zip")
+set(ARCHIVE_PATH "${BIN_DIR}/shweets-sim-web.zip")
 file(REMOVE "${ARCHIVE_PATH}")
 
 file(GLOB INDEX_OUTPUTS "${BIN_DIR}/index.*")
@@ -16,7 +16,7 @@ endforeach()
 
 if(FILES_TO_ZIP)
     execute_process(
-            COMMAND "${CMAKE_COMMAND}" -E tar cf "snivy-web.zip" --format=zip ${FILES_TO_ZIP}
+            COMMAND "${CMAKE_COMMAND}" -E tar cf "shweets-sim-web.zip" --format=zip ${FILES_TO_ZIP}
             WORKING_DIRECTORY "${BIN_DIR}"
             RESULT_VARIABLE ZIP_RESULT
     )
@@ -24,5 +24,5 @@ if(FILES_TO_ZIP)
         message(FATAL_ERROR "Failed creating ${ARCHIVE_PATH}")
     endif()
 else()
-    message(WARNING "No index.* files found in ${BIN_DIR}; skipping snivy-web.zip creation")
+    message(WARNING "No index.* files found in ${BIN_DIR}; skipping shweets-sim-web.zip creation")
 endif()

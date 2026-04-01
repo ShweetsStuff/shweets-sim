@@ -1,8 +1,8 @@
-# Feed Snivy
+# Shweet's Sim
 
 ![Preview](screenshots/preview.png)
 
-This Is A Video Game Where You Feed The Snivy.
+Interactive character simulation game.
 
 [Resources](https://shweetz.net/files/games/feed-snivy/resources.zip)
 

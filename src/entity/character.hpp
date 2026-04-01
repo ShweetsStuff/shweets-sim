@@ -85,9 +85,9 @@ namespace game::entity
     void tick();
     void play_convert(const std::string&, Mode = PLAY, float time = 0.0f, float speedMultiplier = 1.0f);
     void queue_idle_animation();
-    void queue_interact_area_animation(resource::xml::Character::InteractArea&);
     void queue_play(QueuedPlay);
 
+    std::string animation_append_id_get() const;
     std::string animation_name_convert(const std::string& name);
   };
 }

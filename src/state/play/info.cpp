@@ -9,6 +9,7 @@
 #include <format>
 
 using namespace game::resource;
+using namespace game::resource::xml;
 using namespace game::util;
 
 namespace game::state::play
@@ -18,6 +19,7 @@ namespace game::state::play
     static constexpr auto WIDTH_MULTIPLIER = 0.30f;
     static constexpr auto HEIGHT_MULTIPLIER = 4.0f;
 
+    auto& strings = character.data.strings;
     auto& style = ImGui::GetStyle();
     auto windowSize = imgui::to_ivec2(ImGui::GetMainViewport()->Size);
 
@@ -45,26 +47,29 @@ namespace game::state::play
         auto unitString = (system == measurement::IMPERIAL ? "lbs" : "kg");
 
         auto weightString = util::string::format_commas(weight, 2) + " " + unitString;
-        ImGui::PushFont(ImGui::GetFont(), Font::ABOVE_AVERAGE);
+        ImGui::PushFont(ImGui::GetFont(), Font::HEADER_1);
         ImGui::TextUnformatted(weightString.c_str());
         ImGui::SetItemTooltip("%s", weightString.c_str());
         ImGui::PopFont();
 
         auto stageProgress = character.stage_progress_get();
         ImGui::ProgressBar(stageProgress, ImVec2(ImGui::GetContentRegionAvail().x, 0),
-                           stage >= stageMax ? "MAX" : "To Next Stage");
+                           strings.get(stage >= stageMax ? Strings::InfoProgressMax
+                                                         : Strings::InfoProgressToNextStage)
+                               .c_str());
         if (ImGui::BeginItemTooltip())
         {
-          ImGui::Text("Stage: %i/%i (%0.1f%%)", stage + 1, stageMax + 1, math::to_percent(stageProgress));
+          ImGui::Text(strings.get(Strings::InfoStageProgressFormat).c_str(), stage + 1, stageMax + 1,
+                      math::to_percent(stageProgress));
           ImGui::Separator();
           ImGui::PushStyleColor(ImGuiCol_Text, imgui::to_imvec4(color::GRAY));
           if (stage >= stageMax)
-            ImGui::Text("Maxed out!");
+            ImGui::TextUnformatted(strings.get(Strings::InfoMaxedOut).c_str());
           else
           {
-            ImGui::Text("Start: %0.2f %s", stageWeight, unitString);
-            ImGui::Text("Current: %0.2f %s", weight, unitString);
-            ImGui::Text("Next: %0.2f %s", stageNextWeight, unitString);
+            ImGui::Text(strings.get(Strings::InfoStageStartFormat).c_str(), stageWeight, unitString);
+            ImGui::Text(strings.get(Strings::InfoStageCurrentFormat).c_str(), weight, unitString);
+            ImGui::Text(strings.get(Strings::InfoStageNextFormat).c_str(), stageNextWeight, unitString);
           }
           ImGui::PopStyleColor();
           ImGui::EndTooltip();
@@ -82,7 +87,7 @@ namespace game::state::play
         auto overstuffedPercent = std::max(0.0f, (calories - capacity) / (character.max_capacity() - capacity));
         auto caloriesColor = ImVec4(1.0f, 1.0f - overstuffedPercent, 1.0f - overstuffedPercent, 1.0f);
 
-        ImGui::PushFont(ImGui::GetFont(), Font::ABOVE_AVERAGE);
+        ImGui::PushFont(ImGui::GetFont(), Font::HEADER_1);
         ImGui::PushStyleColor(ImGuiCol_Text, caloriesColor);
         auto caloriesString = std::format("{:.0f} kcal / {:.0f} kcal", calories,
                                           character.is_over_capacity() ? character.max_capacity() : character.capacity);
@@ -95,14 +100,16 @@ namespace game::state::play
                                      ? (float)character.digestionTimer / character.data.digestionTimerMax
                                      : character.digestionProgress / entity::Character::DIGESTION_MAX;
         ImGui::ProgressBar(digestionProgress, ImVec2(ImGui::GetContentRegionAvail().x, 0),
-                           character.isDigesting ? "Digesting..." : "Digestion");
+                           strings.get(character.isDigesting ? Strings::InfoDigesting
+                                                             : Strings::InfoDigestion)
+                               .c_str());
 
         if (ImGui::BeginItemTooltip())
         {
           if (character.isDigesting)
-            ImGui::TextUnformatted("Digestion in progress...");
+            ImGui::TextUnformatted(strings.get(Strings::InfoDigestionInProgress).c_str());
           else if (digestionProgress <= 0.0f)
-            ImGui::TextUnformatted("Give food to start digesting!");
+            ImGui::TextUnformatted(strings.get(Strings::InfoGiveFoodToStartDigesting).c_str());
           else
             ImGui::Text("%0.2f%%", math::to_percent(digestionProgress));
 
@@ -110,8 +117,8 @@ namespace game::state::play
 
           ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetColorU32(imgui::to_imvec4(color::GRAY)));
 
-          ImGui::Text("Rate: %0.2f%% / sec", character.digestion_rate_get());
-          ImGui::Text("Eating Speed: %0.2fx", character.eatSpeed);
+          ImGui::Text(strings.get(Strings::InfoDigestionRateFormat).c_str(), character.digestion_rate_get());
+          ImGui::Text(strings.get(Strings::InfoEatingSpeedFormat).c_str(), character.eatSpeed);
 
           ImGui::PopStyleColor();
 

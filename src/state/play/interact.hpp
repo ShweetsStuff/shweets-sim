@@ -6,7 +6,7 @@
 
 namespace game::state::play
 {
-  class Chat
+  class Interact
   {
   public:
     void update(Resources&, Text&, entity::Character&);

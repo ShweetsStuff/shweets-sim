@@ -1,4 +1,5 @@
 #include "play.hpp"
+#include "play/style.hpp"
 
 #include <array>
 #include <glm/glm.hpp>
@@ -11,12 +12,25 @@
 #include "../util/math.hpp"
 
 using namespace game::resource;
+using namespace game::resource::xml;
 using namespace game::util;
 using namespace game::state::play;
 using namespace glm;
 
 namespace game::state
 {
+  namespace
+  {
+    int durability_animation_index_get(const resource::xml::Item& schema, const resource::xml::Anm2& anm2, int durability,
+                                       int durabilityMax)
+    {
+      if (durability >= durabilityMax) return -1;
+
+      auto animationName = schema.animations.chew + std::to_string(std::max(0, durability));
+      return anm2.animationMap.contains(animationName) ? anm2.animationMap.at(animationName) : -1;
+    }
+  }
+
   World::Focus Play::focus_get()
   {
     if (!isWindows) return World::CENTER;
@@ -40,9 +54,10 @@ namespace game::state
 
     character =
         entity::Character(data, vec2(World::BOUNDS.x + World::BOUNDS.z * 0.5f, World::BOUNDS.w - World::BOUNDS.y));
-    character.digestionRate = glm::clamp(data.digestionRateMin, character.digestionRate, data.digestionRateMax);
-    character.eatSpeed = glm::clamp(data.eatSpeedMin, character.eatSpeed, data.eatSpeedMax);
-    character.capacity = glm::clamp(data.capacityMin, character.capacity, data.capacityMax);
+    character.digestionRate =
+        glm::clamp(character.digestionRate, (float)data.digestionRateMin, (float)data.digestionRateMax);
+    character.eatSpeed = glm::clamp(character.eatSpeed, (float)data.eatSpeedMin, (float)data.eatSpeedMax);
+    character.capacity = glm::clamp(character.capacity, (float)data.capacityMin, (float)data.capacityMax);
 
     auto isAlternateSpritesheet =
         (game == NEW_GAME && math::random_percent_roll(data.alternateSpritesheet.chanceOnNewGame));
@@ -71,29 +86,34 @@ namespace game::state
     for (auto& item : saveData.items)
     {
       auto& anm2 = itemSchema.anm2s.at(item.id);
-      auto chewAnimation = itemSchema.animations.chew + std::to_string(item.chewCount);
-      auto animationIndex = item.chewCount > 0 ? anm2.animationMap[chewAnimation] : -1;
+      auto& schemaItem = itemSchema.items.at(item.id);
+      auto durabilityMax = schemaItem.durability.value_or(itemSchema.durability);
+      auto animationIndex = durability_animation_index_get(itemSchema, anm2, item.durability, durabilityMax);
       auto& saveItem = itemSchema.anm2s.at(item.id);
-      itemManager.items.emplace_back(saveItem, item.position, item.id, item.chewCount, animationIndex, item.velocity,
+      itemManager.items.emplace_back(saveItem, item.position, item.id, item.durability, animationIndex, item.velocity,
                                      item.rotation);
     }
 
     imgui::style::rounding_set(menuSchema.rounding);
     imgui::widget::sounds_set(&menuSchema.sounds.hover, &menuSchema.sounds.select);
-    menu.color_set_check(resources, character);
+    play::style::color_set(resources, character);
 
-    menu.skillCheck = SkillCheck(character);
-    menu.skillCheck.totalPlays = saveData.totalPlays;
-    menu.skillCheck.highScore = saveData.highScore;
-    menu.skillCheck.bestCombo = saveData.bestCombo;
-    menu.skillCheck.gradeCounts = saveData.gradeCounts;
-    menu.skillCheck.isHighScoreAchieved = saveData.highScore > 0 ? true : false;
-    menu.isChat = character.data.dialogue.help.is_valid() || character.data.dialogue.random.is_valid();
+    menu.arcade = Arcade(character);
+    menu.arcade.skillCheck.totalPlays = saveData.totalPlays;
+    menu.arcade.skillCheck.highScore = saveData.highScore;
+    menu.arcade.skillCheck.bestCombo = saveData.bestCombo;
+    menu.arcade.skillCheck.gradeCounts = saveData.gradeCounts;
+    menu.arcade.skillCheck.isHighScoreAchieved = saveData.highScore > 0 ? true : false;
 
     text.entry = nullptr;
     text.isEnabled = false;
 
+#if DEBUG
+    menu.isCheats = true;
+#else
     menu.isCheats = false;
+#endif
+
     isPostgame = saveData.isPostgame;
     if (character.stage_get() >= character.stage_max_get()) isPostgame = true;
     if (isPostgame) menu.isCheats = true;
@@ -190,7 +210,7 @@ namespace game::state
           menu.isCheats = true;
           cheatCodeIndex = 0;
           cheatCodeStartTime = 0.0;
-          toasts.push("Cheats unlocked!");
+          toasts.push(character.data.strings.get(Strings::ToastCheatsUnlocked));
           character.data.menuSchema.sounds.cheatsActivated.play();
         }
       }
@@ -338,10 +358,10 @@ namespace game::state
     save.digestionTimer = character.digestionTimer;
     save.totalCaloriesConsumed = character.totalCaloriesConsumed;
     save.totalFoodItemsEaten = character.totalFoodItemsEaten;
-    save.totalPlays = menu.skillCheck.totalPlays;
-    save.highScore = menu.skillCheck.highScore;
-    save.bestCombo = menu.skillCheck.bestCombo;
-    save.gradeCounts = menu.skillCheck.gradeCounts;
+    save.totalPlays = menu.arcade.skillCheck.totalPlays;
+    save.highScore = menu.arcade.skillCheck.highScore;
+    save.bestCombo = menu.arcade.skillCheck.bestCombo;
+    save.gradeCounts = menu.arcade.skillCheck.gradeCounts;
     save.isPostgame = isPostgame;
     save.isAlternateSpritesheet = character.spritesheetType == entity::Character::ALTERNATE;
 
@@ -352,7 +372,7 @@ namespace game::state
     }
 
     for (auto& item : itemManager.items)
-      save.items.emplace_back(item.schemaID, item.chewCount, item.position, item.velocity,
+      save.items.emplace_back(item.schemaID, item.durability, item.position, item.velocity,
                               *item.overrides[item.rotationOverrideID].frame.rotation);
 
     save.isValid = true;
@@ -360,6 +380,6 @@ namespace game::state
     resources.character_save_set(characterIndex, save);
     save.serialize(character.data.save_path_get());
 
-    toasts.push("Saving...");
+    toasts.push(character.data.strings.get(Strings::ToastSaving));
   }
 };

@@ -54,7 +54,7 @@ namespace game
 
     logger.info("Initializing...");
 
-    if (!PHYSFS_init((argc > 0 && argv && argv[0]) ? argv[0] : "snivy"))
+    if (!PHYSFS_init((argc > 0 && argv && argv[0]) ? argv[0] : "shweets-sim"))
     {
       logger.fatal(std::format("Failed to initialize PhysicsFS: {}", PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode())));
       isError = true;
@@ -85,12 +85,12 @@ namespace game
 
 #ifdef __EMSCRIPTEN__
     static constexpr glm::vec2 SIZE = {1600, 900};
-    window = SDL_CreateWindow("Feed Snivy", SIZE.x, SIZE.y, SDL_WINDOW_OPENGL);
+    window = SDL_CreateWindow("Shweet's Sim", SIZE.x, SIZE.y, SDL_WINDOW_OPENGL);
 #else
 
     SDL_PropertiesID windowProperties = SDL_CreateProperties();
 
-    SDL_SetStringProperty(windowProperties, SDL_PROP_WINDOW_CREATE_TITLE_STRING, "Feed Snivy");
+    SDL_SetStringProperty(windowProperties, SDL_PROP_WINDOW_CREATE_TITLE_STRING, "Shweet's Sim");
     SDL_SetNumberProperty(windowProperties, SDL_PROP_WINDOW_CREATE_WIDTH_NUMBER, (long)settings.windowSize.x);
     SDL_SetNumberProperty(windowProperties, SDL_PROP_WINDOW_CREATE_HEIGHT_NUMBER, (long)settings.windowSize.y);
 

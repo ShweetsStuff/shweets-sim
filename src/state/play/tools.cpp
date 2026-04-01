@@ -7,6 +7,7 @@
 
 using namespace game::util;
 using namespace game::util::imgui;
+using namespace game::resource::xml;
 
 namespace game::state::play
 {
@@ -18,6 +19,7 @@ namespace game::state::play
     auto style = ImGui::GetStyle();
     auto& io = ImGui::GetIO();
     auto& schema = character.data.menuSchema;
+    auto& strings = character.data.strings;
 
     slide.update(isOpen, io.DeltaTime);
 
@@ -56,8 +58,9 @@ namespace game::state::play
           ImGui::PopStyleColor();
         };
 
-        if (WIDGET_FX(ImGui::Button("Home", buttonSize))) world.character_focus(character, canvas, focus);
-        ImGui::SetItemTooltip("%s", "Reset camera view.\n(Shortcut: Home)");
+        if (WIDGET_FX(ImGui::Button(strings.get(Strings::ToolsHomeButton).c_str(), buttonSize)))
+          world.character_focus(character, canvas, focus);
+        ImGui::SetItemTooltip("%s", strings.get(Strings::ToolsHomeTooltip).c_str());
 
         for (int i = 0; i < (int)character.data.interactTypeNames.size(); i++)
           cursor_mode_button(character.data.interactTypeNames[i], i);
@@ -82,7 +85,9 @@ namespace game::state::play
 
       if (t <= 0.0f || t >= 1.0f)
       {
-        ImGui::SetItemTooltip(isOpen ? "Close Tools" : "Open Tools");
+        ImGui::SetItemTooltip("%s", strings.get(isOpen ? Strings::ToolsCloseTooltip
+                                                       : Strings::ToolsOpenTooltip)
+                                        .c_str());
         if (result)
         {
           isOpen = !isOpen;

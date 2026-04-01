@@ -18,16 +18,20 @@ namespace game::util::imgui::style
     static constexpr auto COLOR_BG_ALPHA = 0.90f;
     static constexpr auto COLOR_ACTIVE_MULTIPLIER = 1.30f;
     static constexpr auto COLOR_HOVERED_MULTIPLIER = 1.60f;
+    static constexpr auto COLOR_ACTIVE_HOVERED_MIN = 0.1f;
+    static constexpr auto COLOR_ACTIVE_HOVERED_MAX = 0.9f;
     static constexpr auto COLOR_ACCENT_MULTIPLIER = 2.0f;
     static constexpr auto COLOR_ACCENT_ACTIVE_MULTIPLIER = 2.25f;
 
     auto& colors = ImGui::GetStyle().Colors;
+    auto active_hovered_clamp = [](glm::vec3 color)
+    { return glm::clamp(color, glm::vec3(COLOR_ACTIVE_HOVERED_MIN), glm::vec3(COLOR_ACTIVE_HOVERED_MAX)); };
 
     auto colorNew = to_imvec4(glm::vec4(color, 1.0f));
     auto colorBg = to_imvec4(glm::vec4(color * COLOR_BG_MULTIPLIER, COLOR_BG_ALPHA));
     auto colorChildBg = to_imvec4(glm::vec4(color * COLOR_BG_MULTIPLIER, 0.0f));
-    auto colorActive = to_imvec4(glm::vec4(color * COLOR_ACTIVE_MULTIPLIER, 1.0f));
-    auto colorHovered = to_imvec4(glm::vec4(color * COLOR_HOVERED_MULTIPLIER, 1.0f));
+    auto colorActive = to_imvec4(glm::vec4(active_hovered_clamp(color * COLOR_ACTIVE_MULTIPLIER), 1.0f));
+    auto colorHovered = to_imvec4(glm::vec4(active_hovered_clamp(color * COLOR_HOVERED_MULTIPLIER), 1.0f));
     auto colorAccent = to_imvec4(glm::vec4(color * COLOR_ACCENT_MULTIPLIER, 1.0f));
     auto colorAccentActive = to_imvec4(glm::vec4(color * COLOR_ACCENT_ACTIVE_MULTIPLIER, 1.0f));
 

@@ -1,4 +1,5 @@
 #include "inventory.hpp"
+#include "style.hpp"
 
 #include <cmath>
 #include <format>
@@ -7,6 +8,7 @@
 
 #include "../../util/color.hpp"
 #include "../../util/imgui.hpp"
+#include "../../util/imgui/style.hpp"
 #include "../../util/imgui/widget.hpp"
 #include "../../util/math.hpp"
 
@@ -18,6 +20,8 @@ using namespace glm;
 
 namespace game::state::play
 {
+  using Strings = resource::xml::Strings;
+
   void Inventory::tick()
   {
     for (auto& [i, actor] : actors)
@@ -29,6 +33,7 @@ namespace game::state::play
     static constexpr auto INFO_CHILD_HEIGHT_MULTIPLIER = 1.0f / 3.0f;
 
     auto& schema = character.data.itemSchema;
+    auto& strings = character.data.strings;
 
     auto quantity_get = [&](int itemID) -> int&
     {
@@ -45,6 +50,77 @@ namespace game::state::play
 
     auto is_able_to_upgrade_get = [&](const resource::xml::Item::Entry& item, int quantity)
     { return is_possible_to_upgrade_get(item) && quantity >= *item.upgradeCount; };
+
+    auto item_summary_draw = [&](const resource::xml::Item::Entry& item, int quantity)
+    {
+      auto& category = schema.categories[item.categoryID];
+      auto& rarity = schema.rarities[item.rarityID];
+      auto durability = item.durability.value_or(schema.durability);
+
+      ImGui::PushFont(ImGui::GetFont(), Font::HEADER_2);
+      ImGui::TextWrapped("%s (x%i)", item.name.c_str(), quantity);
+      ImGui::PopFont();
+
+      ImGui::Separator();
+      ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetColorU32(imgui::to_imvec4(color::GRAY)));
+      ImGui::TextWrapped("-- %s (%s) --", category.name.c_str(), rarity.name.c_str());
+      if (item.flavorID.has_value())
+        ImGui::TextWrapped(strings.get(Strings::InventoryFlavorFormat).c_str(),
+                           schema.flavors[*item.flavorID].name.c_str());
+      if (item.calories.has_value())
+        ImGui::TextWrapped(strings.get(Strings::InventoryCaloriesFormat).c_str(), *item.calories);
+      ImGui::TextWrapped(strings.get(Strings::InventoryDurabilityFormat).c_str(), durability);
+      if (item.capacityBonus.has_value())
+        ImGui::TextWrapped(strings.get(Strings::InventoryCapacityBonusFormat).c_str(), *item.capacityBonus);
+      if (item.digestionBonus.has_value())
+      {
+        if (*item.digestionBonus > 0)
+          ImGui::TextWrapped(strings.get(Strings::InventoryDigestionRateBonusFormat).c_str(),
+                             *item.digestionBonus * 60.0f);
+        else if (*item.digestionBonus < 0)
+          ImGui::TextWrapped(strings.get(Strings::InventoryDigestionRatePenaltyFormat).c_str(),
+                             *item.digestionBonus * 60.0f);
+      }
+      if (item.eatSpeedBonus.has_value())
+      {
+        if (*item.eatSpeedBonus > 0)
+          ImGui::TextWrapped(strings.get(Strings::InventoryEatSpeedBonusFormat).c_str(), *item.eatSpeedBonus);
+        else if (*item.eatSpeedBonus < 0)
+          ImGui::TextWrapped(strings.get(Strings::InventoryEatSpeedPenaltyFormat).c_str(), *item.eatSpeedBonus);
+      }
+      if (is_possible_to_upgrade_get(item))
+        ImGui::TextWrapped(strings.get(Strings::InventoryUpgradePreviewFormat).c_str(), *item.upgradeCount,
+                           schema.idToStringMap.at(*item.upgradeID).c_str());
+      ImGui::PopStyleColor();
+
+      ImGui::Separator();
+    };
+
+    auto item_details_draw = [&](const resource::xml::Item::Entry& item, int quantity)
+    {
+      item_summary_draw(item, quantity);
+
+      if (ImGui::BeginChild("##Info Description Child", ImGui::GetContentRegionAvail()))
+        ImGui::TextWrapped("%s", item.description.c_str());
+      ImGui::EndChild();
+    };
+
+    auto item_tooltip_draw = [&](const resource::xml::Item::Entry& item, int quantity)
+    {
+      ImGui::PushTextWrapPos(ImGui::GetFontSize() * 24.0f);
+      item_summary_draw(item, quantity);
+      ImGui::TextWrapped("%s", item.description.c_str());
+      ImGui::PopTextWrapPos();
+    };
+
+    auto item_unknown_draw = [&]()
+    {
+      ImGui::PushFont(ImGui::GetFont(), Font::HEADER_2);
+      ImGui::PushTextWrapPos(ImGui::GetFontSize() * 24.0f);
+      ImGui::TextWrapped("%s", strings.get(Strings::InventoryUnknown).c_str());
+      ImGui::PopTextWrapPos();
+      ImGui::PopFont();
+    };
 
     auto item_use = [&](int itemID)
     {
@@ -176,6 +252,7 @@ namespace game::state::play
           auto& item = schema.items[i];
           auto& quantity = quantity_get(i);
           auto& rarity = schema.rarities[item.rarityID];
+          auto hasItemColor = item.color.has_value();
 
           if (rarity.isHidden && quantity <= 0) continue;
 
@@ -185,6 +262,7 @@ namespace game::state::play
           auto cursorScreenPos = ImGui::GetCursorScreenPos();
           auto [canvas, rect] = item_canvas_get(i, size);
           auto isSelected = selectedItemID == i;
+          if (hasItemColor) imgui::style::color_set(*item.color);
 
           if (isSelected)
           {
@@ -201,8 +279,16 @@ namespace game::state::play
           isAnyInventoryItemHovered = isAnyInventoryItemHovered || ImGui::IsItemHovered();
           if (isPressed) selectedItemID = i;
           if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left) && quantity > 0) item_use(i);
+          if (ImGui::BeginItemTooltip())
+          {
+            if (quantity > 0)
+              item_tooltip_draw(item, quantity);
+            else
+              item_unknown_draw();
+            ImGui::EndTooltip();
+          }
 
-          ImGui::PushFont(ImGui::GetFont(), Font::BIG);
+          ImGui::PushFont(ImGui::GetFont(), Font::HEADER_2);
 
           auto text = std::format("x{}", quantity);
           auto textPos = ImVec2(cursorScreenPos.x + size.x - ImGui::CalcTextSize(text.c_str()).x,
@@ -210,6 +296,7 @@ namespace game::state::play
           ImGui::GetWindowDrawList()->AddText(textPos, ImGui::GetColorU32(ImGui::GetStyleColorVec4(ImGuiCol_Text)),
                                               text.c_str());
           ImGui::PopFont();
+          if (hasItemColor) style::color_set(resources, character);
 
           auto increment = ImGui::GetItemRectSize().x + ImGui::GetStyle().ItemSpacing.x;
           cursorPos.x += increment;
@@ -231,13 +318,15 @@ namespace game::state::play
       isItemSelected = selectedItemID >= 0 && selectedItemID < (int)schema.items.size();
       auto selectedQuantity = isItemSelected ? quantity_get(selectedItemID) : 0;
       auto isSelectedItemKnown = isItemSelected && selectedQuantity > 0;
+      auto selectedItemHasColor = isItemSelected && schema.items[selectedItemID].color.has_value();
 
       if (isInfoVisible &&
           ImGui::BeginChild("##Info Child", infoChildSize, ImGuiChildFlags_None, ImGuiWindowFlags_NoScrollbar))
       {
+        if (selectedItemHasColor) imgui::style::color_set(*schema.items[selectedItemID].color);
         ImGui::Separator();
         auto isButtonChildVisible = selectedQuantity > 0;
-        ImGui::PushFont(resources.font.get(), Font::BIG);
+        ImGui::PushFont(resources.font.get(), Font::HEADER_2);
         auto buttonRowHeight = ImGui::GetFrameHeight();
         auto buttonChildHeight =
             isButtonChildVisible ? buttonRowHeight * 2.0f + ImGui::GetStyle().ItemSpacing.y * 5.0f : 0.0f;
@@ -252,56 +341,18 @@ namespace game::state::play
         {
           if (!isItemSelected)
           {
-            ImGui::PushFont(ImGui::GetFont(), Font::BIG);
-            ImGui::TextWrapped("%s", "Check the \"Arcade\" tab to earn rewards!");
+            ImGui::PushFont(ImGui::GetFont(), Font::HEADER_2);
+            ImGui::TextWrapped("%s", strings.get(Strings::InventoryEmptyHint).c_str());
             ImGui::PopFont();
           }
           else
           {
             auto& item = schema.items[selectedItemID];
-            auto& category = schema.categories[item.categoryID];
-            auto& rarity = schema.rarities[item.rarityID];
 
             if (isSelectedItemKnown)
-            {
-              ImGui::PushFont(ImGui::GetFont(), Font::BIG);
-              ImGui::TextWrapped("%s (x%i)", item.name.c_str(), selectedQuantity);
-              ImGui::PopFont();
-
-              ImGui::Separator();
-              ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetColorU32(imgui::to_imvec4(color::GRAY)));
-              ImGui::TextWrapped("-- %s (%s) --", category.name.c_str(), rarity.name.c_str());
-              if (item.flavorID.has_value())
-                ImGui::TextWrapped("Flavor: %s", schema.flavors[*item.flavorID].name.c_str());
-              if (item.calories.has_value()) ImGui::TextWrapped("%0.0f kcal", *item.calories);
-              if (item.digestionBonus.has_value())
-              {
-                if (*item.digestionBonus > 0)
-                  ImGui::TextWrapped("Digestion Rate Bonus: +%0.2f%% / sec", *item.digestionBonus * 60.0f);
-                else if (*item.digestionBonus < 0)
-                  ImGui::TextWrapped("Digestion Rate Penalty: %0.2f%% / sec", *item.digestionBonus * 60.0f);
-              }
-              if (item.eatSpeedBonus.has_value())
-              {
-                if (*item.eatSpeedBonus > 0)
-                  ImGui::TextWrapped("Eat Speed Bonus: +%0.2f%% / sec", *item.eatSpeedBonus);
-                else if (*item.eatSpeedBonus < 0)
-                  ImGui::TextWrapped("Eat Speed Penalty: %0.2f%% / sec", *item.eatSpeedBonus);
-              }
-              if (is_possible_to_upgrade_get(item))
-                ImGui::TextWrapped("Upgrade: %ix -> %s", *item.upgradeCount,
-                                   schema.idToStringMap.at(*item.upgradeID).c_str());
-              ImGui::PopStyleColor();
-
-              ImGui::Separator();
-              ImGui::TextWrapped("%s", item.description.c_str());
-            }
+              item_details_draw(item, selectedQuantity);
             else
-            {
-              ImGui::PushFont(ImGui::GetFont(), Font::BIG);
-              ImGui::TextWrapped("%s", "???");
-              ImGui::PopFont();
-            }
+              item_unknown_draw();
           }
         }
         ImGui::EndChild();
@@ -310,28 +361,75 @@ namespace game::state::play
             ImGui::BeginChild("##Info Actions Child", buttonChildSize, ImGuiChildFlags_None,
                               ImGuiWindowFlags_NoScrollbar))
         {
+          auto& selectedItem = schema.items[selectedItemID];
           auto canUseSelectedItem = true;
-          auto canUpgradeSelectedItem = is_able_to_upgrade_get(schema.items[selectedItemID], selectedQuantity);
+          auto canUpgradeSelectedItem = is_able_to_upgrade_get(selectedItem, selectedQuantity);
           auto rowTwoButtonSize = row_widget_size_get(2);
+
+          auto upgrade_item_name_get = [&]() -> std::string
+          {
+            if (!selectedItem.upgradeID.has_value()) return {};
+            return schema.items.at(*selectedItem.upgradeID).name;
+          };
+
+          auto upgrade_tooltip_get = [&](bool isAll)
+          {
+            if (!is_possible_to_upgrade_get(selectedItem))
+              return strings.get(Strings::InventoryUpgradeNoPath);
+
+            auto upgradeItemName = upgrade_item_name_get();
+            auto upgradeCount = *selectedItem.upgradeCount;
+
+            if (!canUpgradeSelectedItem)
+              return std::vformat(strings.get(Strings::InventoryUpgradeNeedsTemplate),
+                                  std::make_format_args(upgradeCount, upgradeItemName));
+
+            if (!isAll)
+              return std::vformat(strings.get(Strings::InventoryUpgradeOneTemplate),
+                                  std::make_format_args(upgradeCount, upgradeItemName));
+
+            auto upgradedCount = selectedQuantity / upgradeCount;
+            return std::vformat(strings.get(Strings::InventoryUpgradeAllTemplate),
+                                std::make_format_args(upgradeCount, upgradedCount, upgradeItemName));
+          };
 
           ImGui::Separator();
           ImGui::Dummy(ImVec2(0, ImGui::GetStyle().ItemSpacing.y));
 
-          ImGui::PushFont(ImGui::GetFont(), Font::BIG);
+          ImGui::PushFont(ImGui::GetFont(), Font::HEADER_2);
 
           ImGui::BeginDisabled(!canUseSelectedItem);
-          if (WIDGET_FX(ImGui::Button("Spawn", {ImGui::GetContentRegionAvail().x, 0}))) item_use(selectedItemID);
+          if (WIDGET_FX(ImGui::Button(strings.get(Strings::InventorySpawnButton).c_str(),
+                                      {ImGui::GetContentRegionAvail().x, 0})))
+            item_use(selectedItemID);
           ImGui::EndDisabled();
 
           ImGui::BeginDisabled(!canUpgradeSelectedItem);
-          if (WIDGET_FX(ImGui::Button("Upgrade", rowTwoButtonSize))) item_upgrade(selectedItemID, false);
+          if (WIDGET_FX(
+                  ImGui::Button(strings.get(Strings::InventoryUpgradeButton).c_str(), rowTwoButtonSize)))
+            item_upgrade(selectedItemID, false);
+          if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
+          {
+            ImGui::PushFont(ImGui::GetFont(), Font::NORMAL);
+            ImGui::SetItemTooltip("%s", upgrade_tooltip_get(false).c_str());
+            ImGui::PopFont();
+          }
           ImGui::SameLine();
-          if (WIDGET_FX(ImGui::Button("Upgrade All", rowTwoButtonSize))) item_upgrade(selectedItemID, true);
+          if (WIDGET_FX(ImGui::Button(strings.get(Strings::InventoryUpgradeAllButton).c_str(),
+                                      rowTwoButtonSize)))
+            item_upgrade(selectedItemID, true);
+          if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
+          {
+            ImGui::PushFont(ImGui::GetFont(), Font::NORMAL);
+            ImGui::SetItemTooltip("%s", upgrade_tooltip_get(true).c_str());
+            ImGui::PopFont();
+          }
           ImGui::EndDisabled();
 
           ImGui::PopFont();
         }
         if (isButtonChildVisible) ImGui::EndChild();
+        if (selectedItemHasColor) style::color_set(resources, character);
       }
       if (isInfoVisible) ImGui::EndChild();
     }

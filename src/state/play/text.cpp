@@ -37,10 +37,12 @@ namespace game::state::play
     index = 0;
     time = 0.0f;
     isEnabled = true;
-    character.isTalking = true;
     if (!dialogueEntry->animation.empty())
       character.queue_play({.animation = dialogueEntry->animation, .isInterruptible = isInterruptible});
-    if (dialogueEntry->text.empty()) isEnabled = false;
+    if (dialogueEntry->text.empty())
+      isEnabled = false;
+    else
+      character.isTalking = true;
   }
 
   void Text::tick(entity::Character& character)
@@ -48,6 +50,8 @@ namespace game::state::play
     if (!entry || isFinished) return;
 
     index++;
+    auto blipPeriod = character.data.textBlipPeriodBase;
+    if (blipPeriod > 0 && index % blipPeriod == 0) character.data.sounds.blip.play();
 
     if (index >= ImTextCountCharsFromUtf8(entry->text.c_str(), entry->text.c_str() + entry->text.size()))
     {

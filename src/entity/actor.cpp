@@ -237,15 +237,23 @@ namespace game::entity
 
     if (!queuedPlay.empty())
     {
-      auto& index = animationMap.at(queuedPlay.animation);
-      if (queuedPlay.isPlayAfterAnimation)
-        nextQueuedPlay = queuedPlay;
-      else if ((state == STOPPED || index != animationIndex) && currentQueuedPlay.isInterruptible)
+      if (!animationMap.contains(queuedPlay.animation))
       {
-        play(queuedPlay.animation, queuedPlay.mode, queuedPlay.time, queuedPlay.speedMultiplier);
-        currentQueuedPlay = queuedPlay;
+        logger.error(std::string("Animation \"" + queuedPlay.animation + "\" does not exist! Unable to play!"));
+        if (!defaultAnimation.empty()) queue_default_animation();
       }
-      queuedPlay = QueuedPlay{};
+      else
+      {
+        auto& index = animationMap.at(queuedPlay.animation);
+        if (queuedPlay.isPlayAfterAnimation)
+          nextQueuedPlay = queuedPlay;
+        else if ((state == STOPPED || index != animationIndex) && currentQueuedPlay.isInterruptible)
+        {
+          play(queuedPlay.animation, queuedPlay.mode, queuedPlay.time, queuedPlay.speedMultiplier);
+          currentQueuedPlay = queuedPlay;
+        }
+        queuedPlay = QueuedPlay{};
+      }
     }
 
     auto animation = animation_get();

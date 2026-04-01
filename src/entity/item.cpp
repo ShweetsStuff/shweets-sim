@@ -10,9 +10,9 @@ using namespace glm;
 
 namespace game::entity
 {
-  Item::Item(Anm2 _anm2, glm::ivec2 _position, int _schemaID, int _chewCount, int _animationIndex, glm::vec2 _velocity,
+  Item::Item(Anm2 _anm2, glm::ivec2 _position, int _schemaID, int _durability, int _animationIndex, glm::vec2 _velocity,
              float _rotation)
-      : Actor(_anm2, _position, SET, 0.0f, _animationIndex), schemaID(_schemaID), chewCount(_chewCount),
+      : Actor(_anm2, _position, SET, 0.0f, _animationIndex), schemaID(_schemaID), durability(_durability),
         velocity(_velocity)
   {
 

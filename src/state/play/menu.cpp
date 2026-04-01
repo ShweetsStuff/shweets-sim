@@ -1,5 +1,7 @@
 #include "menu.hpp"
 
+#include "style.hpp"
+
 #include "../../util/imgui.hpp"
 #include "../../util/imgui/style.hpp"
 #include "../../util/imgui/widget.hpp"
@@ -8,18 +10,14 @@
 
 using namespace game::util;
 using namespace game::util::imgui;
+using namespace game::resource::xml;
 
 namespace game::state::play
 {
   void Menu::tick()
   {
     inventory.tick();
-    skillCheck.tick();
-  }
-
-  void Menu::color_set_check(Resources& resources, entity::Character& character)
-  {
-    imgui::style::color_set(resources.settings.isUseCharacterColor ? character.data.color : resources.settings.color);
+    arcade.tick();
   }
 
   void Menu::update(Resources& resources, ItemManager& itemManager, entity::Character& character,
@@ -28,6 +26,7 @@ namespace game::state::play
     static constexpr auto WIDTH_MULTIPLIER = 0.30f;
 
     auto& schema = character.data.menuSchema;
+    auto& strings = character.data.strings;
 
     auto style = ImGui::GetStyle();
     auto& io = ImGui::GetIO();
@@ -61,47 +60,41 @@ namespace game::state::play
         if (ImGui::BeginTabBar("##Options"))
         {
 
-          if (isChat && WIDGET_FX(ImGui::BeginTabItem("Chat")))
+          if (WIDGET_FX(ImGui::BeginTabItem(strings.get(Strings::MenuTabInteract).c_str())))
           {
-            chat.update(resources, text, character);
+            interact.update(resources, text, character);
             ImGui::EndTabItem();
           }
 
-          if (WIDGET_FX(ImGui::BeginTabItem("Arcade")))
+          if (WIDGET_FX(ImGui::BeginTabItem(strings.get(Strings::MenuTabArcade).c_str())))
           {
-            skillCheck.update(resources, character, inventory, text);
+            arcade.update(resources, character, inventory, text);
             ImGui::EndTabItem();
           }
 
-          if (WIDGET_FX(ImGui::BeginTabItem("Inventory")))
+          if (WIDGET_FX(ImGui::BeginTabItem(strings.get(Strings::MenuTabInventory).c_str())))
           {
             inventory.update(resources, itemManager, character);
             ImGui::EndTabItem();
           }
 
-          if (WIDGET_FX(ImGui::BeginTabItem("Stats")))
+          if (WIDGET_FX(ImGui::BeginTabItem(strings.get(Strings::MenuTabSettings).c_str())))
           {
-            stats.update(resources, skillCheck, character);
+            settingsMenu.update(resources, SettingsMenu::PLAY, &strings);
+            if (settingsMenu.isJustColorSet) style::color_set(resources, character);
             ImGui::EndTabItem();
           }
 
-          if (WIDGET_FX(ImGui::BeginTabItem("Settings")))
+          if (isCheats && WIDGET_FX(ImGui::BeginTabItem(strings.get(Strings::MenuTabCheats).c_str())))
           {
-            settingsMenu.update(resources, SettingsMenu::PLAY);
-            if (settingsMenu.isJustColorSet) color_set_check(resources, character);
-            ImGui::EndTabItem();
-          }
-
-          if (isCheats && WIDGET_FX(ImGui::BeginTabItem("Cheats")))
-          {
-            cheats.update(resources, character, inventory, text);
+            cheats.update(resources, character, inventory);
             ImGui::EndTabItem();
           }
 
 #if DEBUG
-          if (WIDGET_FX(ImGui::BeginTabItem("Debug")))
+          if (WIDGET_FX(ImGui::BeginTabItem(strings.get(Strings::MenuTabDebug).c_str())))
           {
-            debug.update(character, cursor, itemManager, canvas);
+            debug.update(character, cursor, itemManager, canvas, text);
             ImGui::EndTabItem();
           }
 #endif
@@ -128,7 +121,9 @@ namespace game::state::play
 
       if (t <= 0.0f || t >= 1.0f)
       {
-        ImGui::SetItemTooltip(isOpen ? "Close Main Menu" : "Open Main Menu");
+        ImGui::SetItemTooltip("%s", strings.get(isOpen ? Strings::MenuCloseTooltip
+                                                       : Strings::MenuOpenTooltip)
+                                        .c_str());
         if (result)
         {
           isOpen = !isOpen;

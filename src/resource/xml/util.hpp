@@ -32,6 +32,8 @@ namespace game::resource::xml
                                                     std::optional<float>& value);
   tinyxml2::XMLError query_int_optional_attribute(tinyxml2::XMLElement* element, const char* attribute,
                                                   std::optional<int>& value);
+  tinyxml2::XMLError query_optional_vec3(tinyxml2::XMLElement* element, const char* attributeX, const char* attributeY,
+                                         const char* attributeZ, std::optional<glm::vec3>& value);
 
   tinyxml2::XMLError query_event_id(tinyxml2::XMLElement* element, const char* name, const Anm2& anm2, int& eventID);
   tinyxml2::XMLError query_layer_id(tinyxml2::XMLElement* element, const char* name, const Anm2& anm2, int& layerID);

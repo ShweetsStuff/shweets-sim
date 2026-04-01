@@ -6,13 +6,16 @@
 #include "../../../util/imgui/widget.hpp"
 #include "../../../util/math.hpp"
 
+#include <array>
 #include <cmath>
+#include <cstdio>
 #include <format>
 #include <ranges>
 
 using namespace game::util;
 using namespace game::entity;
 using namespace game::resource;
+using namespace game::resource::xml;
 using namespace glm;
 
 namespace game::state::play
@@ -69,7 +72,7 @@ namespace game::state::play
       actor.tick();
   }
 
-  void SkillCheck::update(Resources& resources, entity::Character& character, Inventory& inventory, Text& text)
+  bool SkillCheck::update(Resources& resources, entity::Character& character, Inventory& inventory, Text& text)
   {
     static constexpr auto BG_COLOR_MULTIPLIER = 0.5f;
     static constexpr ImVec4 LINE_COLOR = ImVec4(1, 1, 1, 1);
@@ -82,25 +85,31 @@ namespace game::state::play
     auto& dialogue = character.data.dialogue;
     auto& schema = character.data.skillCheckSchema;
     auto& itemSchema = character.data.itemSchema;
+    auto& strings = character.data.strings;
     auto& style = ImGui::GetStyle();
     auto drawList = ImGui::GetWindowDrawList();
     auto position = ImGui::GetCursorScreenPos();
     auto size = ImGui::GetContentRegionAvail();
     auto spacing = ImGui::GetTextLineHeightWithSpacing();
     auto& io = ImGui::GetIO();
+    auto menuButtonHeight = ImGui::GetFrameHeightWithSpacing();
+    size.y = std::max(0.0f, size.y - menuButtonHeight);
 
     auto cursorPos = ImGui::GetCursorPos();
 
-    ImGui::Text("Score: %i pts (%ix)", score, combo);
-    auto bestString = std::format("Best: {} pts({}x)", highScore, bestCombo);
+    ImGui::Text(strings.get(Strings::SkillCheckScoreFormat).c_str(), score, combo);
+    std::array<char, 128> bestBuffer{};
+    std::snprintf(bestBuffer.data(), bestBuffer.size(), strings.get(Strings::SkillCheckBestFormat).c_str(), highScore,
+                  bestCombo);
+    auto bestString = std::string(bestBuffer.data());
     ImGui::SetCursorPos(ImVec2(size.x - ImGui::CalcTextSize(bestString.c_str()).x, cursorPos.y));
 
-    ImGui::Text("Best: %i pts (%ix)", highScore, bestCombo);
+    ImGui::Text(strings.get(Strings::SkillCheckBestFormat).c_str(), highScore, bestCombo);
 
     if (score == 0 && isActive)
     {
       ImGui::SetCursorPos(ImVec2(style.WindowPadding.x, size.y - style.WindowPadding.y));
-      ImGui::TextWrapped("Match the line to the colored areas with Space/click! Better performance, better rewards!");
+      ImGui::TextWrapped("%s", strings.get(Strings::SkillCheckInstructions).c_str());
     }
 
     auto barMin = ImVec2(position.x + (size.x * 0.5f) - (spacing * 0.5f), position.y + (spacing * 2.0f));
@@ -193,8 +202,11 @@ namespace game::state::play
           score--;
           schema.sounds.scoreLoss.play();
           auto toastMessagePosition =
-              ImVec2(barMin.x - ImGui::CalcTextSize("-1").x - ImGui::GetTextLineHeightWithSpacing(), lineMin.y);
-          toasts.emplace_back("-1", toastMessagePosition, schema.endTimerMax, schema.endTimerMax);
+              ImVec2(barMin.x - ImGui::CalcTextSize(strings.get(Strings::SkillCheckScoreLoss).c_str()).x -
+                         ImGui::GetTextLineHeightWithSpacing(),
+                     lineMin.y);
+          toasts.emplace_back(strings.get(Strings::SkillCheckScoreLoss), toastMessagePosition, schema.endTimerMax,
+                              schema.endTimerMax);
         }
       }
 
@@ -258,10 +270,10 @@ namespace game::state::play
             }
 
             auto toastMessagePosition =
-                ImVec2(barMin.x - ImGui::CalcTextSize("Fantastic score!\nCongratulations!").x -
+                ImVec2(barMin.x - ImGui::CalcTextSize(strings.get(Strings::SkillCheckRewardToast).c_str()).x -
                            ImGui::GetTextLineHeightWithSpacing(),
                        lineMin.y + (ImGui::GetTextLineHeightWithSpacing() + ImGui::GetStyle().ItemSpacing.y));
-            toasts.emplace_back("Fantastic score! Congratulations!", toastMessagePosition, schema.endTimerMax,
+            toasts.emplace_back(strings.get(Strings::SkillCheckRewardToast), toastMessagePosition, schema.endTimerMax,
                                 schema.endTimerMax);
           }
 
@@ -274,9 +286,11 @@ namespace game::state::play
               isHighScoreAchievedThisRun = true;
               schema.sounds.highScore.play();
               auto toastMessagePosition =
-                  ImVec2(barMin.x - ImGui::CalcTextSize("High Score!").x - ImGui::GetTextLineHeightWithSpacing(),
+                  ImVec2(barMin.x - ImGui::CalcTextSize(strings.get(Strings::SkillCheckHighScoreToast).c_str()).x -
+                             ImGui::GetTextLineHeightWithSpacing(),
                          lineMin.y + ImGui::GetTextLineHeightWithSpacing());
-              toasts.emplace_back("High Score!", toastMessagePosition, schema.endTimerMax, schema.endTimerMax);
+              toasts.emplace_back(strings.get(Strings::SkillCheckHighScoreToast), toastMessagePosition,
+                                  schema.endTimerMax, schema.endTimerMax);
             }
           }
 
@@ -337,10 +351,10 @@ namespace game::state::play
         {
           score = 0;
           combo = 0;
-          if (isHighScoreAchieved) schema.sounds.highScoreLoss.play();
+          if (isHighScoreAchievedThisRun) schema.sounds.highScoreLoss.play();
           if (highScore > 0) isHighScoreAchieved = true;
           isRewardScoreAchieved = false;
-          isHighScoreAchievedThisRun = true;
+          isHighScoreAchievedThisRun = false;
           highScoreStart = highScore;
           isGameOver = true;
         }
@@ -351,7 +365,9 @@ namespace game::state::play
 
         queuedChallenge = challenge_generate(character);
 
-        auto string = grade.isFailure ? grade.name : std::format("{} (+{})", grade.name, grade.value);
+        auto string = grade.isFailure ? grade.name
+                                      : std::vformat(strings.get(Strings::SkillCheckGradeSuccessTemplate),
+                                                     std::make_format_args(grade.name, grade.value));
         auto toastMessagePosition =
             ImVec2(barMin.x - ImGui::CalcTextSize(string.c_str()).x - ImGui::GetTextLineHeightWithSpacing(), lineMin.y);
         toasts.emplace_back(string, toastMessagePosition, endTimerMax, endTimerMax);
@@ -429,5 +445,8 @@ namespace game::state::play
       if (fallingItem.position.y > position.y + size.y) items.erase(items.begin() + i--);
     }
     ImGui::PopClipRect();
+
+    ImGui::SetCursorScreenPos(ImVec2(position.x, position.y + size.y + ImGui::GetStyle().ItemSpacing.y));
+    return WIDGET_FX(ImGui::Button(strings.get(Strings::SkillCheckMenuButton).c_str()));
   }
 }

@@ -14,12 +14,12 @@ namespace game::entity
 
     int schemaID{};
     int rotationOverrideID{};
-    int chewCount{};
+    int durability{};
 
     glm::vec2 velocity{};
     float angularVelocity{};
 
-    Item(resource::xml::Anm2, glm::ivec2 position, int id, int chewCount = 0, int animationIndex = -1,
+    Item(resource::xml::Anm2, glm::ivec2 position, int id, int durability = 0, int animationIndex = -1,
          glm::vec2 velocity = {}, float rotation = 0.0f);
     void update();
   };

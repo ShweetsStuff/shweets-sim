@@ -81,7 +81,7 @@ namespace game::state::play
     SkillCheck(entity::Character&);
     Challenge challenge_generate(entity::Character&);
     void tick();
-    void update(Resources&, entity::Character&, Inventory&, Text&);
+    bool update(Resources&, entity::Character&, Inventory&, Text&);
     float accuracy_score_get(entity::Character&);
   };
 }

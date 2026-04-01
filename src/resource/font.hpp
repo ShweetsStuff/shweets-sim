@@ -14,11 +14,9 @@ namespace game::resource
 
   public:
     static constexpr auto NORMAL = 20;
-    static constexpr auto ABOVE_AVERAGE = 24;
-    static constexpr auto BIG = 30;
+    static constexpr auto HEADER_1 = 24;
+    static constexpr auto HEADER_2 = 30;
     static constexpr auto HEADER_3 = 40;
-    static constexpr auto HEADER_2 = 50;
-    static constexpr auto HEADER_1 = 60;
 
     Font() = default;
     Font(const std::filesystem::path&, float = NORMAL);

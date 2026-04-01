@@ -59,7 +59,7 @@
       "label": "linux: run debug",
       "type": "shell",
       "linux": {
-        "command": "${workspaceFolder}/out/build/linux-debug/bin/Debug/snivy"
+        "command": "${workspaceFolder}/out/build/linux-debug/bin/Debug/shweets-sim"
       },
       "options": {
         "cwd": "${workspaceFolder}/out/build/linux-debug/bin/Debug"
@@ -74,7 +74,7 @@
       "label": "linux: run release",
       "type": "shell",
       "linux": {
-        "command": "${workspaceFolder}/out/build/linux-release/bin/Release/snivy"
+        "command": "${workspaceFolder}/out/build/linux-release/bin/Release/shweets-sim"
       },
       "options": {
         "cwd": "${workspaceFolder}/out/build/linux-release/bin/Release"
@@ -112,7 +112,7 @@
       "label": "web: serve",
       "type": "shell",
       "linux": {
-        "command": "sh -lc 'PID_FILE=/tmp/snivy-web-http.pid; LOG_FILE=/tmp/snivy-web-http.log; WEB_ROOT=out/build/web; URL=http://127.0.0.1:8000/bin/Release/index.html; [ -f \"$WEB_ROOT/bin/Release/index.html\" ] || { echo \"Web output not found at $WEB_ROOT/bin/Release/index.html (run web: build)\"; exit 1; }; if [ -f \"$PID_FILE\" ] && kill -0 \"$(cat \"$PID_FILE\")\" 2>/dev/null; then kill \"$(cat \"$PID_FILE\")\" >/dev/null 2>&1 || true; rm -f \"$PID_FILE\"; fi; nohup python3 -m http.server 8000 --bind 127.0.0.1 --directory \"$WEB_ROOT\" >\"$LOG_FILE\" 2>&1 & echo $! >\"$PID_FILE\"; echo \"Started web server on http://127.0.0.1:8000 (root: $WEB_ROOT)\"; READY=0; for _ in $(seq 1 40); do if command -v curl >/dev/null 2>&1; then curl -fsS \"$URL\" >/dev/null 2>&1 && READY=1 && break; elif command -v wget >/dev/null 2>&1; then wget -qO- \"$URL\" >/dev/null 2>&1 && READY=1 && break; fi; sleep 0.1; done; [ \"$READY\" = \"1\" ] || { echo \"Web server did not become ready. See /tmp/snivy-web-http.log\"; exit 1; }'"
+        "command": "sh -lc 'PID_FILE=/tmp/shweets-sim-web-http.pid; LOG_FILE=/tmp/shweets-sim-web-http.log; WEB_ROOT=out/build/web; URL=http://127.0.0.1:8000/bin/Release/index.html; [ -f \"$WEB_ROOT/bin/Release/index.html\" ] || { echo \"Web output not found at $WEB_ROOT/bin/Release/index.html (run web: build)\"; exit 1; }; if [ -f \"$PID_FILE\" ] && kill -0 \"$(cat \"$PID_FILE\")\" 2>/dev/null; then kill \"$(cat \"$PID_FILE\")\" >/dev/null 2>&1 || true; rm -f \"$PID_FILE\"; fi; nohup python3 -m http.server 8000 --bind 127.0.0.1 --directory \"$WEB_ROOT\" >\"$LOG_FILE\" 2>&1 & echo $! >\"$PID_FILE\"; echo \"Started web server on http://127.0.0.1:8000 (root: $WEB_ROOT)\"; READY=0; for _ in $(seq 1 40); do if command -v curl >/dev/null 2>&1; then curl -fsS \"$URL\" >/dev/null 2>&1 && READY=1 && break; elif command -v wget >/dev/null 2>&1; then wget -qO- \"$URL\" >/dev/null 2>&1 && READY=1 && break; fi; sleep 0.1; done; [ \"$READY\" = \"1\" ] || { echo \"Web server did not become ready. See /tmp/shweets-sim-web-http.log\"; exit 1; }'"
       },
       "windows": {
         "command": "echo \"web tasks are configured for Linux (emsdk + python + chromium).\" && exit 1"
@@ -123,7 +123,7 @@
       "label": "web: stop server",
       "type": "shell",
       "linux": {
-        "command": "sh -lc 'PID_FILE=/tmp/snivy-web-http.pid; if [ -f \"$PID_FILE\" ] && kill -0 \"$(cat \"$PID_FILE\")\" 2>/dev/null; then kill \"$(cat \"$PID_FILE\")\" && rm -f \"$PID_FILE\" && echo \"Stopped web server\"; else rm -f \"$PID_FILE\" && echo \"Web server not running\"; fi'"
+        "command": "sh -lc 'PID_FILE=/tmp/shweets-sim-web-http.pid; if [ -f \"$PID_FILE\" ] && kill -0 \"$(cat \"$PID_FILE\")\" 2>/dev/null; then kill \"$(cat \"$PID_FILE\")\" && rm -f \"$PID_FILE\" && echo \"Stopped web server\"; else rm -f \"$PID_FILE\" && echo \"Web server not running\"; fi'"
       },
       "windows": {
         "command": "echo \"web tasks are configured for Linux (emsdk + python + chromium).\" && exit 1"
@@ -154,7 +154,7 @@
       "label": "web: run",
       "type": "shell",
       "linux": {
-        "command": "sh -lc 'set -e; if ! command -v emcmake >/dev/null 2>&1; then if [ -n \"$EMSDK\" ] && [ -f \"$EMSDK/emsdk_env.sh\" ]; then . \"$EMSDK/emsdk_env.sh\" >/dev/null 2>&1; elif [ -f \"$HOME/emsdk/emsdk_env.sh\" ]; then . \"$HOME/emsdk/emsdk_env.sh\" >/dev/null 2>&1; elif [ -f \"../emsdk/emsdk_env.sh\" ]; then . \"../emsdk/emsdk_env.sh\" >/dev/null 2>&1; else echo \"Emscripten not found. Install emsdk or set EMSDK env var.\"; exit 1; fi; fi; emcmake cmake -S . -B out/build/web -DCMAKE_BUILD_TYPE=Release; cmake --build out/build/web -j$(nproc); PID_FILE=/tmp/snivy-web-http.pid; LOG_FILE=/tmp/snivy-web-http.log; WEB_ROOT=out/build/web; URL=http://127.0.0.1:8000/bin/Release/index.html; [ -f \"$WEB_ROOT/bin/Release/index.html\" ] || { echo \"Web output not found at $WEB_ROOT/bin/Release/index.html\"; exit 1; }; if [ -f \"$PID_FILE\" ] && kill -0 \"$(cat \"$PID_FILE\")\" 2>/dev/null; then kill \"$(cat \"$PID_FILE\")\" >/dev/null 2>&1 || true; rm -f \"$PID_FILE\"; fi; nohup python3 -m http.server 8000 --bind 127.0.0.1 --directory \"$WEB_ROOT\" >\"$LOG_FILE\" 2>&1 & echo $! >\"$PID_FILE\"; echo \"Started web server on http://127.0.0.1:8000 (root: $WEB_ROOT)\"; READY=0; for _ in $(seq 1 40); do if command -v curl >/dev/null 2>&1; then curl -fsS \"$URL\" >/dev/null 2>&1 && READY=1 && break; elif command -v wget >/dev/null 2>&1; then wget -qO- \"$URL\" >/dev/null 2>&1 && READY=1 && break; fi; sleep 0.1; done; [ \"$READY\" = \"1\" ] || { echo \"Web server did not become ready. See /tmp/snivy-web-http.log\"; exit 1; }; (xdg-open \"$URL\" >/dev/null 2>&1 || chromium --new-tab \"$URL\" >/dev/null 2>&1 || chromium-browser --new-tab \"$URL\" >/dev/null 2>&1 || google-chrome --new-tab \"$URL\" >/dev/null 2>&1 || google-chrome-stable --new-tab \"$URL\" >/dev/null 2>&1 || python3 -m webbrowser \"$URL\" >/dev/null 2>&1 || { echo \"Could not launch browser automatically. Open: $URL\"; exit 0; }) & sleep 0.15; echo \"Requested browser open: $URL\"'"
+        "command": "sh -lc 'set -e; if ! command -v emcmake >/dev/null 2>&1; then if [ -n \"$EMSDK\" ] && [ -f \"$EMSDK/emsdk_env.sh\" ]; then . \"$EMSDK/emsdk_env.sh\" >/dev/null 2>&1; elif [ -f \"$HOME/emsdk/emsdk_env.sh\" ]; then . \"$HOME/emsdk/emsdk_env.sh\" >/dev/null 2>&1; elif [ -f \"../emsdk/emsdk_env.sh\" ]; then . \"../emsdk/emsdk_env.sh\" >/dev/null 2>&1; else echo \"Emscripten not found. Install emsdk or set EMSDK env var.\"; exit 1; fi; fi; emcmake cmake -S . -B out/build/web -DCMAKE_BUILD_TYPE=Release; cmake --build out/build/web -j$(nproc); PID_FILE=/tmp/shweets-sim-web-http.pid; LOG_FILE=/tmp/shweets-sim-web-http.log; WEB_ROOT=out/build/web; URL=http://127.0.0.1:8000/bin/Release/index.html; [ -f \"$WEB_ROOT/bin/Release/index.html\" ] || { echo \"Web output not found at $WEB_ROOT/bin/Release/index.html\"; exit 1; }; if [ -f \"$PID_FILE\" ] && kill -0 \"$(cat \"$PID_FILE\")\" 2>/dev/null; then kill \"$(cat \"$PID_FILE\")\" >/dev/null 2>&1 || true; rm -f \"$PID_FILE\"; fi; nohup python3 -m http.server 8000 --bind 127.0.0.1 --directory \"$WEB_ROOT\" >\"$LOG_FILE\" 2>&1 & echo $! >\"$PID_FILE\"; echo \"Started web server on http://127.0.0.1:8000 (root: $WEB_ROOT)\"; READY=0; for _ in $(seq 1 40); do if command -v curl >/dev/null 2>&1; then curl -fsS \"$URL\" >/dev/null 2>&1 && READY=1 && break; elif command -v wget >/dev/null 2>&1; then wget -qO- \"$URL\" >/dev/null 2>&1 && READY=1 && break; fi; sleep 0.1; done; [ \"$READY\" = \"1\" ] || { echo \"Web server did not become ready. See /tmp/shweets-sim-web-http.log\"; exit 1; }; (xdg-open \"$URL\" >/dev/null 2>&1 || chromium --new-tab \"$URL\" >/dev/null 2>&1 || chromium-browser --new-tab \"$URL\" >/dev/null 2>&1 || google-chrome --new-tab \"$URL\" >/dev/null 2>&1 || google-chrome-stable --new-tab \"$URL\" >/dev/null 2>&1 || python3 -m webbrowser \"$URL\" >/dev/null 2>&1 || { echo \"Could not launch browser automatically. Open: $URL\"; exit 0; }) & sleep 0.15; echo \"Requested browser open: $URL\"'"
       },
       "windows": {
         "command": "echo \"web tasks are configured for Linux (emsdk + python + chromium).\" && exit 1"

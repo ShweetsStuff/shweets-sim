@@ -1,10 +1,10 @@
-# Modding Feed Snivy
+# Modding Shweet's Sim
 
-Want to add characters or modify existing ones or mod Feed Snivy in general or otherwise want to know how the game works? Here's how.
+Want to add characters or modify existing ones or mod Shweet's Sim in general or otherwise want to know how the game works? Here's how.
 
 # Animation Format
 
-Feed Snivy uses a semi-proprietary format called ".anm2" for tweened character animations, sourced from a spritesheet. This file format comes from the game _The Binding of Isaac: Rebirth_ (a game I mod on my own time) for animations. 
+Shweet's Sim uses a semi-proprietary format called ".anm2" for tweened character animations, sourced from a spritesheet. This file format comes from the game _The Binding of Isaac: Rebirth_ (a game I mod on my own time) for animations. 
 
 You can either use my own animation editor for that game and this one (recommended), [Anm2Ed](https://github.com/ShweetsStuff/anm2ed), or if you have that game on Steam, you can find that game's own proprietary animation editor in that game's Steam folder and then in tools/IsaacAnimationEditor. I can't guarantee the stability or perfect efficacy of either, but Anm2Ed has crash mitigations and autosave (but of course, save often, for whatever you do).
 
@@ -26,7 +26,7 @@ There's two folders inside resources; "characters" and "font".
 
 EVERYTHING ELSE is stored inside bespoke character archives (.zips) in the "characters" folder. This has all data associated with characters. Think of characters more as tailored game experiences rather than literally being just the characters. Not only is there the character graphics, but backgrounds, items, parameters, etc. These are intensely customizable to suit whatever experience you'd like (within the confines of the engine, of course).
 
-Feed Snivy uses a collection of [XML](https://en.wikipedia.org/wiki/XML) files to parse data; make sure to brush up on the format. The engine can expect six files in the archive's root: 
+Shweet's Sim uses a collection of [XML](https://en.wikipedia.org/wiki/XML) files to parse data; make sure to brush up on the format. The engine can expect six files in the archive's root: 
 
 - areas.xml
 - character.xml
@@ -34,7 +34,7 @@ Feed Snivy uses a collection of [XML](https://en.wikipedia.org/wiki/XML) files t
 - dialogue.xml
 - items.xml
 - menu.xml
-- play.xml
+- skill_check.xml
 
 (dialogue.xml may or may not be optional; but in future updates I'll make sure of it, for dialogueless characters).
 
@@ -460,10 +460,10 @@ Sound that will play after entering a special code to activate cheats.
 #### Sound (path)
 The sound that will play, based on SoundRootPath.
 
-## play.xml
-Determines behavior and appearance of the "Play" minigame.
+## skill_check.xml
+Determines behavior and appearance of the "Skill Check" minigame.
 
-### Play
+### SkillCheck
 #### SoundRootPath (path)
 Working folder/directory of where used sounds will be contained within.
 #### RewardScore (int)
@@ -529,7 +529,7 @@ This sound will play when the grade is hit.
 
 # Saves
 
-Outside of resources, Feed Snivy also has a few files it writes outside of the game. You will find these in %AppData%/snivy on Windows and ~/.local/share/snivy on Linux.
+Outside of resources, Shweet's Sim also has a few files it writes outside of the game. You will find these in %AppData%/shweets-sim on Windows and ~/.local/share/shweets-sim on Linux.
 
 ## settings.xml
 Stores general game settings and configuration; beyond invididual characters.
@@ -574,8 +574,7 @@ When digestion bar is going down, this is the remaining time to 0 (in ticks)
 Total calories consumed by the character, per save file.
 #### TotalFoodItemsEaten (int)
 How many food items have been completely consumed by the character, per save file.
-
-### Play
+### SkillCheck
 #### TotalPlays (int)
 However many times the "play" game has been attempted (hitting the bar counts as one "play")
 #### HighScore (int)
@@ -599,4 +598,4 @@ Count of the item.
 
 # Conclusion
 
-Hopefully this'll give you the resources you need to start making your own characters. If you need any help with this guide, or with clarification on anything, I'm available. Additionally, the game is [licensed as free software](https://github.com/ShweetsStuff/snivy), meaning if you're stuck the code should give you a clue (though I apologize for the lack of comments. Self-documenting code though, am I right? :^) )
+Hopefully this'll give you the resources you need to start making your own characters. If you need any help with this guide, or with clarification on anything, I'm available. Additionally, the game is [licensed as free software](https://github.com/ShweetsStuff/shweets-sim), meaning if you're stuck the code should give you a clue (though I apologize for the lack of comments. Self-documenting code though, am I right? :^) )

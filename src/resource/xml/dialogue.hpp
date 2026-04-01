@@ -5,6 +5,7 @@
 #include <string>
 
 #include <map>
+#include <vector>
 
 #include "../../util/physfs.hpp"
 
@@ -45,11 +46,7 @@ namespace game::resource::xml
       inline bool is_valid() const { return id != -1; };
     };
 
-    class Pool : public std::vector<int>
-    {
-    public:
-      int get() const;
-    };
+    class Pool : public std::vector<int> {};
 
     std::map<std::string, int> entryIDMap;
     std::map<int, std::string> entryIDMapReverse;
@@ -57,6 +54,8 @@ namespace game::resource::xml
 
     std::vector<Pool> pools{};
     std::map<std::string, int> poolMap{};
+    std::vector<long long> entrySelectionOrder{};
+    long long selectionCounter{};
 
     EntryReference start{-1};
     EntryReference end{-1};
@@ -83,6 +82,7 @@ namespace game::resource::xml
     Entry* get(Dialogue::EntryReference&);
     Entry* get(Dialogue::Pool&);
     Entry* get(Dialogue::PoolReference&);
+    int entry_pick(Pool&);
     void query_entry_id(tinyxml2::XMLElement* element, const char* name, int& id);
     void query_pool_id(tinyxml2::XMLElement* element, const char* name, int& id);
     inline bool is_valid() const { return isValid; };

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../resource/xml/strings.hpp"
 #include "../resources.hpp"
 
 namespace game::state
@@ -17,6 +18,6 @@ namespace game::state
     bool isSave{};
     bool isJustColorSet{};
 
-    void update(Resources&, Mode = SELECT);
+    void update(Resources&, Mode = SELECT, const resource::xml::Strings* = nullptr);
   };
 }

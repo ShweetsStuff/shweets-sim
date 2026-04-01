@@ -6,6 +6,8 @@
 #include <unordered_set>
 #include <vector>
 
+#include <glm/glm.hpp>
+
 #include "../audio.hpp"
 #include "anm2.hpp"
 #include "sound_entry.hpp"
@@ -46,10 +48,12 @@ namespace game::resource::xml
       std::optional<int> upgradeID{};
       std::optional<int> flavorID;
       std::optional<float> calories{};
+      std::optional<float> capacityBonus{};
+      std::optional<glm::vec3> color{};
       std::optional<float> eatSpeedBonus{};
       std::optional<float> digestionBonus{};
       std::optional<float> gravity{};
-      std::optional<int> chewCount{};
+      std::optional<int> durability{};
       bool isSkillCheckReward{};
       bool isToggleSpritesheet{};
     };
@@ -90,7 +94,7 @@ namespace game::resource::xml
     Animations animations{};
     Sounds sounds{};
     Anm2 baseAnm2{};
-    int chewCount{2};
+    int durability{2};
     int quantityMax{99};
 
     bool isValid{};

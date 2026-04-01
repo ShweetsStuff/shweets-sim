@@ -43,28 +43,31 @@ namespace game::resource::xml
 
       query_vec3(root, "ColorR", "ColorG", "ColorB", color);
 
-      root->QueryFloatAttribute("Weight", &weight);
+      root->QueryDoubleAttribute("Weight", &weight);
+      root->QueryDoubleAttribute("WeightMax", &weightMax);
 
-      root->QueryFloatAttribute("Capacity", &capacity);
-      root->QueryFloatAttribute("CapacityMin", &capacityMin);
-      root->QueryFloatAttribute("CapacityMax", &capacityMax);
-      root->QueryFloatAttribute("CapacityMaxMultiplier", &capacityMaxMultiplier);
-      root->QueryFloatAttribute("CapacityIfOverStuffedOnDigestBonus", &capacityIfOverStuffedOnDigestBonus);
+      root->QueryDoubleAttribute("Capacity", &capacity);
+      root->QueryDoubleAttribute("CapacityMin", &capacityMin);
+      root->QueryDoubleAttribute("CapacityMax", &capacityMax);
+      root->QueryDoubleAttribute("CapacityMaxMultiplier", &capacityMaxMultiplier);
+      root->QueryDoubleAttribute("CapacityIfOverStuffedOnDigestBonus", &capacityIfOverStuffedOnDigestBonus);
 
-      root->QueryFloatAttribute("CaloriesToKilogram", &caloriesToKilogram);
+      root->QueryDoubleAttribute("CaloriesToKilogram", &caloriesToKilogram);
 
-      root->QueryFloatAttribute("DigestionRate", &digestionRate);
-      root->QueryFloatAttribute("DigestionRateMin", &digestionRateMin);
-      root->QueryFloatAttribute("DigestionRateMax", &digestionRateMax);
+      root->QueryDoubleAttribute("DigestionRate", &digestionRate);
+      root->QueryDoubleAttribute("DigestionRateMin", &digestionRateMin);
+      root->QueryDoubleAttribute("DigestionRateMax", &digestionRateMax);
       root->QueryIntAttribute("DigestionTimerMax", &digestionTimerMax);
 
-      root->QueryFloatAttribute("EatSpeed", &eatSpeed);
-      root->QueryFloatAttribute("EatSpeedMin", &eatSpeedMin);
-      root->QueryFloatAttribute("EatSpeedMax", &eatSpeedMax);
+      root->QueryDoubleAttribute("EatSpeed", &eatSpeed);
+      root->QueryDoubleAttribute("EatSpeedMin", &eatSpeedMin);
+      root->QueryDoubleAttribute("EatSpeedMax", &eatSpeedMax);
 
-      root->QueryFloatAttribute("BlinkChance", &blinkChance);
-      root->QueryFloatAttribute("GurgleChance", &gurgleChance);
-      root->QueryFloatAttribute("GurgleCapacityMultiplier", &gurgleCapacityMultiplier);
+      root->QueryDoubleAttribute("BlinkChance", &blinkChance);
+      root->QueryDoubleAttribute("GurgleChance", &gurgleChance);
+      root->QueryDoubleAttribute("GurgleCapacityMultiplier", &gurgleCapacityMultiplier);
+
+      root->QueryIntAttribute("TextBlipPeriodBase", &textBlipPeriodBase);
 
       auto dialoguePath = physfs::Path(archive + "/" + "dialogue.xml");
 
@@ -100,6 +103,7 @@ namespace game::resource::xml
 
       if (auto element = root->FirstChildElement("Sounds"))
       {
+        query_sound_entry_collection(element, "Blip", archive, soundRootPath, sounds.blip);
         query_sound_entry_collection(element, "Digest", archive, soundRootPath, sounds.digest);
         query_sound_entry_collection(element, "Gurgle", archive, soundRootPath, sounds.gurgle);
       }
@@ -127,6 +131,7 @@ namespace game::resource::xml
           child->QueryFloatAttribute("Threshold", &stage.threshold);
           child->QueryIntAttribute("AreaID", &stage.areaID);
           dialogue.query_pool_id(child, "DialoguePoolID", stage.pool.id);
+          query_string_attribute(child, "AnimationAppendID", &stage.animationAppendID);
           stages.emplace_back(std::move(stage));
         }
       }
@@ -178,12 +183,11 @@ namespace game::resource::xml
           if (child->FindAttribute("Layer")) query_layer_id(child, "Layer", anm2, interactArea.layerID);
 
           query_null_id(child, "Null", anm2, interactArea.nullID);
-          query_string_attribute(child, "Animation", &interactArea.animation);
-          query_string_attribute(child, "AnimationFull", &interactArea.animationFull);
           query_string_attribute(child, "AnimationCursorHover", &interactArea.animationCursorHover);
           query_string_attribute(child, "AnimationCursorActive", &interactArea.animationCursorActive);
           query_sound_entry_collection(child, "Sound", archive, soundRootPath, interactArea.sound, "Path");
           dialogue.query_pool_id(child, "DialoguePoolID", interactArea.pool.id);
+          dialogue.query_pool_id(child, "DialoguePoolIDFull", interactArea.poolFull.id);
           query_bool_attribute(child, "IsHold", &interactArea.isHold);
           child->QueryFloatAttribute("DigestionBonusRub", &interactArea.digestionBonusRub);
           child->QueryFloatAttribute("DigestionBonusClick", &interactArea.digestionBonusClick);
@@ -224,6 +228,9 @@ namespace game::resource::xml
       skillCheckSchema = SkillCheck(skillCheckSchemaPath, dialogue);
     else
       logger.warning(std::format("No character skill_check.xml file found: {}", path.string()));
+
+    if (auto stringsPath = physfs::Path(archive + "/" + "strings.xml"); stringsPath.is_valid())
+      strings = Strings(stringsPath);
 
     logger.info(std::format("Initialized character: {}", name));
 

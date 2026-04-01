@@ -23,7 +23,7 @@ namespace game::resource::xml
     int volume{50};
     bool isUseCharacterColor{true};
 
-    glm::vec3 color{0.120f, 0.515f, 0.115f};
+    glm::vec3 color{0.120f, 0.120f, 0.120f};
     glm::ivec2 windowSize{1600, 900};
     glm::vec2 windowPosition{};
 

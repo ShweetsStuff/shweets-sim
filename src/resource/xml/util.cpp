@@ -117,6 +117,29 @@ namespace game::resource::xml
     return result;
   }
 
+  XMLError query_optional_vec3(XMLElement* element, const char* attributeX, const char* attributeY,
+                               const char* attributeZ, std::optional<glm::vec3>& value)
+  {
+    auto hasX = element->FindAttribute(attributeX);
+    auto hasY = element->FindAttribute(attributeY);
+    auto hasZ = element->FindAttribute(attributeZ);
+
+    if (!hasX && !hasY && !hasZ)
+    {
+      value.reset();
+      return XML_NO_ATTRIBUTE;
+    }
+
+    value = glm::vec3();
+    auto result = XML_SUCCESS;
+
+    if (hasX) result = query_result_merge(result, element->QueryFloatAttribute(attributeX, &value->x));
+    if (hasY) result = query_result_merge(result, element->QueryFloatAttribute(attributeY, &value->y));
+    if (hasZ) result = query_result_merge(result, element->QueryFloatAttribute(attributeZ, &value->z));
+
+    return result;
+  }
+
   XMLError document_load(const physfs::Path& path, XMLDocument& document)
   {
     if (!path.is_valid())

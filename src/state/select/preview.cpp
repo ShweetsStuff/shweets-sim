@@ -54,7 +54,7 @@ namespace game::state::select
 
           auto renderSize = ImVec2(textureSize.x * scale, textureSize.y * scale);
 
-          ImGui::SetCursorPos(ImVec2(ImGui::GetCursorPosX() + (availableSize.x * 0.5f) - (renderSize.y * 0.5f),
+          ImGui::SetCursorPos(ImVec2(ImGui::GetCursorPosX() + (availableSize.x * 0.5f) - (renderSize.x * 0.5f),
                                      ImGui::GetCursorPosY() + (availableSize.y * 0.5f) - (renderSize.y * 0.5f)));
 
           ImGui::Image(character.render.id, renderSize);

@@ -62,6 +62,7 @@ namespace game::state::play
   {
     static constexpr float MENU_WIDTH_MULTIPLIER = 0.30f;
     static constexpr float TOOLS_WIDTH_MULTIPLIER = 0.10f;
+    static constexpr float INFO_HEIGHT_MULTIPLIER = 4.0f;
     static constexpr float PADDING = 100.0f;
 
     auto rect = character.rect();
@@ -72,13 +73,18 @@ namespace game::state::play
 
     rect = {rect.x - PADDING * 0.5f, rect.y - PADDING * 0.5f, rect.z + PADDING, rect.w + PADDING};
 
-    auto zoomFactor = std::min((float)canvas.size.x / rect.z, (float)canvas.size.y / rect.w);
+    auto infoHeightPixels =
+        ImGui::GetTextLineHeightWithSpacing() * INFO_HEIGHT_MULTIPLIER + ImGui::GetStyle().WindowPadding.y * 2.0f;
+    auto usableHeightPixels = std::max(1.0f, (float)canvas.size.y - infoHeightPixels);
+
+    auto zoomFactor = std::min((float)canvas.size.x / rect.z, usableHeightPixels / rect.w);
     canvas.zoom = glm::clamp(ZOOM_MIN, math::to_percent(zoomFactor), ZOOM_MAX);
     zoomFactor = math::to_unit(canvas.zoom);
 
     auto rectCenter = glm::vec2(rect.x + rect.z * 0.5f, rect.y + rect.w * 0.5f);
     auto viewSizeWorld = glm::vec2(canvas.size) / zoomFactor;
-    canvas.pan = rectCenter - (vec2(viewSizeWorld.x, viewSizeWorld.y) * 0.5f);
+    auto infoHeightWorld = infoHeightPixels / zoomFactor;
+    canvas.pan = rectCenter - vec2(viewSizeWorld.x * 0.5f, (viewSizeWorld.y + infoHeightWorld) * 0.5f);
     auto menuWidthWorld = (canvas.size.x * MENU_WIDTH_MULTIPLIER) / zoomFactor;
     auto toolsWidthWorld = (canvas.size.x * TOOLS_WIDTH_MULTIPLIER) / zoomFactor;
 

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.27)
-project(snivy LANGUAGES C CXX)
+project(shweets-sim LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -132,7 +132,7 @@ add_executable(${PROJECT_NAME}
 if(WIN32 AND NOT CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
     enable_language(RC)
     target_sources(${PROJECT_NAME} PRIVATE
-            "${CMAKE_CURRENT_SOURCE_DIR}/snivy.rc"
+            "${CMAKE_CURRENT_SOURCE_DIR}/shweets-sim.rc"
             "${CMAKE_CURRENT_SOURCE_DIR}/Icon.ico"
     )
 endif()
@@ -205,16 +205,23 @@ set(PROJECT_RESOURCES_BINARY_DIR "${CMAKE_BINARY_DIR}/bin/$<CONFIG>/resources")
 if(EXISTS "${PROJECT_RESOURCES_DIR}")
     file(GLOB_RECURSE PROJECT_RESOURCE_FILES CONFIGURE_DEPENDS
             "${PROJECT_RESOURCES_DIR}/*")
-    if(NOT CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
-        add_custom_target(copy_resources ALL
-                COMMAND ${CMAKE_COMMAND}
-                        -DSRC_DIR="${PROJECT_RESOURCES_DIR}"
-                        -DDST_DIR="${PROJECT_RESOURCES_BINARY_DIR}"
-                        -P "${CMAKE_CURRENT_SOURCE_DIR}/cmake/copy_resources.cmake"
-                DEPENDS ${PROJECT_RESOURCE_FILES}
-                COMMENT "Copying resources directory")
-        add_dependencies(${PROJECT_NAME} copy_resources)
-    endif()
+    list(FILTER PROJECT_RESOURCE_FILES EXCLUDE REGEX ".*/characters/[^/]+\\.zip$")
+    set(COPY_RESOURCES_STAMP "${CMAKE_BINARY_DIR}/CMakeFiles/copy_resources.stamp")
+    add_custom_command(
+            OUTPUT "${COPY_RESOURCES_STAMP}"
+            COMMAND ${CMAKE_COMMAND}
+                    -DSRC_DIR=${PROJECT_RESOURCES_DIR}
+                    -DDST_DIR=${PROJECT_RESOURCES_BINARY_DIR}
+                    -DSTAMP_FILE=${COPY_RESOURCES_STAMP}
+                    -P "${CMAKE_CURRENT_SOURCE_DIR}/cmake/copy_resources.cmake"
+            DEPENDS ${PROJECT_RESOURCE_FILES}
+                    "${CMAKE_CURRENT_SOURCE_DIR}/cmake/copy_resources.cmake"
+            COMMENT "Copying resources directory"
+            VERBATIM
+    )
+    add_custom_target(copy_resources ALL
+            DEPENDS "${COPY_RESOURCES_STAMP}")
+    add_dependencies(${PROJECT_NAME} copy_resources)
     set(HAS_PROJECT_RESOURCES TRUE)
 else()
     set(HAS_PROJECT_RESOURCES FALSE)
@@ -243,7 +250,7 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
     if(HAS_PROJECT_RESOURCES)
         target_link_options(${PROJECT_NAME} PRIVATE
                 "--preload-file"
-                "${PROJECT_RESOURCES_DIR}@resources"
+                "${PROJECT_RESOURCES_BINARY_DIR}@resources"
         )
     endif()
     set_target_properties(${PROJECT_NAME} PROPERTIES
@@ -254,7 +261,7 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
             COMMAND ${CMAKE_COMMAND}
                     -DBIN_DIR="$<TARGET_FILE_DIR:${PROJECT_NAME}>"
                     -P "${CMAKE_CURRENT_SOURCE_DIR}/cmake/create_index_zip.cmake"
-            COMMENT "Creating snivy-web.zip from Emscripten output")
+            COMMENT "Creating shweets-sim-web.zip from Emscripten output")
 else()
     find_package(OpenGL REQUIRED COMPONENTS OpenGL)
     target_link_libraries(${PROJECT_NAME} PRIVATE OpenGL::GL)
@@ -266,9 +273,9 @@ if(WIN32 AND NOT CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
                     -DBIN_ROOT="${CMAKE_BINARY_DIR}/bin"
                     -DTARGET_DIR="$<TARGET_FILE_DIR:${PROJECT_NAME}>"
                     -DEXE_FILE="$<TARGET_FILE_NAME:${PROJECT_NAME}>"
-                    -DPACKAGE_NAME="snivy-win32"
+                    -DPACKAGE_NAME="shweets-sim-win32"
                     -P "${CMAKE_CURRENT_SOURCE_DIR}/cmake/create_windows_zip.cmake"
-            COMMENT "Creating snivy-win32 package")
+            COMMENT "Creating shweets-sim-win32 package")
 endif()
 
 message(STATUS "System: ${CMAKE_SYSTEM_NAME}")

@@ -91,7 +91,8 @@ namespace game::resource::xml
         {
           Item item{};
           child->QueryIntAttribute("ID", &item.id);
-          child->QueryIntAttribute("ChewCount", &item.chewCount);
+          child->QueryIntAttribute("Durability", &item.durability);
+          if (child->FindAttribute("ChewCount")) child->QueryIntAttribute("ChewCount", &item.durability);
           child->QueryFloatAttribute("PositionX", &item.position.x);
           child->QueryFloatAttribute("PositionY", &item.position.y);
           child->QueryFloatAttribute("VelocityX", &item.velocity.x);
@@ -162,7 +163,7 @@ namespace game::resource::xml
       auto itemElement = itemsElement->InsertNewChildElement("Item");
 
       itemElement->SetAttribute("ID", item.id);
-      itemElement->SetAttribute("ChewCount", item.chewCount);
+      itemElement->SetAttribute("Durability", item.durability);
       itemElement->SetAttribute("PositionX", item.position.x);
       itemElement->SetAttribute("PositionY", item.position.y);
       itemElement->SetAttribute("VelocityX", item.velocity.x);

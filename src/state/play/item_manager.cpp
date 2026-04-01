@@ -15,6 +15,18 @@ using namespace glm;
 
 namespace game::state::play
 {
+  namespace
+  {
+    int durability_animation_index_get(const resource::xml::Item& schema, const resource::xml::Anm2& anm2, int durability,
+                                       int durabilityMax)
+    {
+      if (durability >= durabilityMax) return -1;
+
+      auto animationName = schema.animations.chew + std::to_string(std::max(0, durability));
+      return anm2.animationMap.contains(animationName) ? anm2.animationMap.at(animationName) : -1;
+    }
+  }
+
   void ItemManager::update(entity::Character& character, entity::Cursor& cursor, AreaManager& areaManager, Text& text,
                            const glm::vec4& bounds, Canvas& canvas)
   {
@@ -70,7 +82,11 @@ namespace game::state::play
                                 math::random_in_range(spawnBounds.y, spawnBounds.y + spawnBounds.w));
 
       auto& itemSchema = character.data.itemSchema;
-      items.emplace_back(itemSchema.anm2s.at(id), position, id);
+      auto& item = itemSchema.items.at(id);
+      auto& anm2 = itemSchema.anm2s.at(id);
+      auto durabilityMax = item.durability.value_or(itemSchema.durability);
+      auto animationIndex = durability_animation_index_get(itemSchema, anm2, 0, durabilityMax);
+      items.emplace_back(anm2, position, id, 0, animationIndex);
     }
     queuedItemIDs.clear();
 
@@ -97,15 +113,15 @@ namespace game::state::play
 
       if (schema.categories[item.categoryID].isEdible)
       {
-        auto& chewCountMax = item.chewCount.has_value() ? *item.chewCount : schema.chewCount;
-        auto caloriesChew = item.calories.has_value() ? *item.calories / (chewCountMax + 1) : 0;
-        auto isCanEat = character.calories + caloriesChew <= character.max_capacity();
+        auto& durabilityMax = item.durability.has_value() ? *item.durability : schema.durability;
+        auto caloriesPerBite = item.calories.has_value() && durabilityMax > 0 ? *item.calories / durabilityMax : 0;
+        auto isCanEat = character.calories + caloriesPerBite <= character.max_capacity();
 
         if (isJustItemHeld)
         {
           if (isCanEat)
             text.set(dialogue.get(isOverCapacity ? dialogue.feedFull : dialogue.feed), character);
-          else if (caloriesChew > character.capacity)
+          else if (caloriesPerBite > character.capacity)
             text.set(dialogue.get(dialogue.lowCapacity), character);
           else
             text.set(dialogue.get(dialogue.full), character);
@@ -125,36 +141,43 @@ namespace game::state::play
 
             if (character.playedEventID == eatArea.eventID)
             {
-              heldItem->chewCount++;
+              heldItem->durability++;
               character.consume_played_event();
 
-              auto chewAnimation = schema.animations.chew + std::to_string(heldItem->chewCount);
-              auto animationIndex = heldItem->chewCount > 0 ? heldItem->animationMap[chewAnimation] : -1;
+              character.calories += caloriesPerBite;
+              character.totalCaloriesConsumed += caloriesPerBite;
 
-              heldItem->play(animationIndex, entity::Actor::SET);
-
-              character.calories += caloriesChew;
-              character.totalCaloriesConsumed += caloriesChew;
-
+              if (item.capacityBonus.has_value())
+              {
+                character.capacity += *item.capacityBonus / durabilityMax;
+                character.capacity =
+                    glm::clamp(character.capacity, (float)character.data.capacityMin, (float)character.data.capacityMax);
+              }
               if (item.eatSpeedBonus.has_value())
               {
-                character.eatSpeed += *item.eatSpeedBonus / (chewCountMax + 1);
-                character.eatSpeed =
-                    glm::clamp(character.data.eatSpeedMin, character.eatSpeed, character.data.eatSpeedMax);
+                character.eatSpeed += *item.eatSpeedBonus / durabilityMax;
+                character.eatSpeed = glm::clamp(character.eatSpeed, (float)character.data.eatSpeedMin,
+                                                (float)character.data.eatSpeedMax);
               }
               if (item.digestionBonus.has_value())
               {
-                character.digestionRate += *item.digestionBonus / (chewCountMax + 1);
-                character.digestionRate = glm::clamp(character.data.digestionRateMin, character.digestionRate,
-                                                     character.data.digestionRateMax);
+                character.digestionRate += *item.digestionBonus / durabilityMax;
+                character.digestionRate = glm::clamp(character.digestionRate, (float)character.data.digestionRateMin,
+                                                     (float)character.data.digestionRateMax);
               }
 
-              if (heldItem->chewCount > chewCountMax)
+              if (heldItem->durability >= durabilityMax)
               {
                 isQueueFinishFood = true;
                 character.totalFoodItemsEaten++;
                 queuedRemoveItemIndex = heldItemIndex;
                 heldItemIndex = -1;
+              }
+              else
+              {
+                auto animationIndex =
+                    durability_animation_index_get(schema, *heldItem, heldItem->durability, durabilityMax);
+                heldItem->play(animationIndex, entity::Actor::SET);
               }
             }
           }
@@ -177,7 +200,7 @@ namespace game::state::play
 
           // Food stolen
           if (auto animation = character.animation_get(character.animation_name_convert(eatArea.animation));
-              character.is_playing(animation->name))
+              animation && character.is_playing(animation->name))
           {
             if (!math::is_point_in_rectf(rect, heldItem->position))
               text.set(dialogue.get(isOverCapacity ? dialogue.foodTakenFull : dialogue.foodTaken), character);
@@ -232,7 +255,7 @@ namespace game::state::play
 
         if (isMouseRightClicked)
         {
-          if (item.chewCount > 0)
+          if (item.durability > 0)
             schema.sounds.dispose.play();
           else
           {

@@ -41,7 +41,7 @@ namespace game::resource::xml
 
       query_string_attribute(root, "Name", &name);
       query_string_attribute(root, "Description", &description);
-      query_string_attribute(root, "Author", &author);
+      query_string_attribute(root, "Credits", &credits);
       query_vec3(root, "ColorR", "ColorG", "ColorB", color);
       root->QueryFloatAttribute("Weight", &weight);
 

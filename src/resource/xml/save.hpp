@@ -15,7 +15,7 @@ namespace game::resource::xml
     struct Item
     {
       int id{};
-      int chewCount{};
+      int durability{};
       glm::vec2 position{};
       glm::vec2 velocity{};
       float rotation{};

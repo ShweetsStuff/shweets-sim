@@ -89,14 +89,18 @@ namespace game::state::play
                 interact_area_override_tick, interactArea.scaleEffectCycles));
           }
 
-          if (interactArea.pool.is_valid() && text.is_interruptible())
-            text.set(dialogue.get(interactArea.pool), character);
+          if (text.is_interruptible())
+          {
+            auto& pool = character.is_over_capacity() && interactArea.poolFull.is_valid() ? interactArea.poolFull
+                                                                                           : interactArea.pool;
+            if (pool.is_valid())
+              text.set(dialogue.get(pool), character);
+          }
         }
 
         if (isInteracting)
         {
           cursor.state = entity::Cursor::ACTION;
-          character.queue_interact_area_animation(interactArea);
           cursor.queue_play({interactArea.animationCursorActive});
 
           if (interactArea.digestionBonusRub > 0 && character.calories > 0 && !character.isDigesting)

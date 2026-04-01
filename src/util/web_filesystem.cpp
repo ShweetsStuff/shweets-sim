@@ -12,12 +12,12 @@ namespace game::util::web_filesystem
     Module.filesystemReady = 0;
     try
     {
-      FS.mkdir('/snivy');
+      FS.mkdir('/shweets-sim');
     }
     catch (e)
     {
     }
-    FS.mount(IDBFS, {}, '/snivy');
+    FS.mount(IDBFS, {}, '/shweets-sim');
     FS.syncfs(
         true, function(err) {
           if (err) console.error('IDBFS init sync failed', err);

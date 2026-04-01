@@ -4,6 +4,7 @@
 #include "../../log.hpp"
 #include "../../util/math.hpp"
 
+#include <algorithm>
 #include <format>
 
 using namespace tinyxml2;
@@ -98,6 +99,8 @@ namespace game::resource::xml
 
           id++;
         }
+
+        entrySelectionOrder.assign(entries.size(), -1);
       }
 
       if (auto element = root->FirstChildElement("Pools"))
@@ -158,15 +161,32 @@ namespace game::resource::xml
     }
   }
 
-  int Dialogue::Pool::get() const
+  int Dialogue::entry_pick(Pool& pool)
   {
-    if (this->empty()) return -1;
-    auto index = rand() % this->size();
-    return this->at(index);
+    if (pool.empty()) return -1;
+
+    std::vector<int> unselected{};
+    for (auto id : pool)
+      if (id >= 0 && id < (int)entrySelectionOrder.size() && entrySelectionOrder[id] < 0) unselected.emplace_back(id);
+
+    std::vector<int> candidates = unselected.empty() ? std::vector<int>(pool.begin(), pool.end()) : unselected;
+    if (candidates.empty()) return -1;
+
+    auto oldestOrder = entrySelectionOrder[candidates.front()];
+    for (auto id : candidates)
+      oldestOrder = std::min(oldestOrder, entrySelectionOrder[id]);
+
+    std::vector<int> oldestCandidates{};
+    for (auto id : candidates)
+      if (entrySelectionOrder[id] == oldestOrder) oldestCandidates.emplace_back(id);
+
+    auto pickedID = oldestCandidates.at(rand() % oldestCandidates.size());
+    entrySelectionOrder[pickedID] = selectionCounter++;
+    return pickedID;
   }
   Dialogue::Entry* Dialogue::get(int id) { return &entries.at(id); }
   Dialogue::Entry* Dialogue::get(Dialogue::EntryReference& entry) { return &entries.at(entry.id); }
   Dialogue::Entry* Dialogue::get(const std::string& string) { return &entries.at(entryIDMap.at(string)); }
-  Dialogue::Entry* Dialogue::get(Dialogue::PoolReference& pool) { return &entries.at(pools.at(pool.id).get()); }
-  Dialogue::Entry* Dialogue::get(Dialogue::Pool& pool) { return &entries.at(pool.get()); }
+  Dialogue::Entry* Dialogue::get(Dialogue::PoolReference& pool) { return &entries.at(entry_pick(pools.at(pool.id))); }
+  Dialogue::Entry* Dialogue::get(Dialogue::Pool& pool) { return &entries.at(entry_pick(pool)); }
 }

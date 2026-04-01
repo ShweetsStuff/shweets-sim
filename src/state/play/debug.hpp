@@ -4,6 +4,7 @@
 #include "../../entity/cursor.hpp"
 
 #include "item_manager.hpp"
+#include "text.hpp"
 
 #include <imgui.h>
 
@@ -14,6 +15,6 @@ namespace game::state::play
   public:
     bool isBoundsDisplay{};
 
-    void update(entity::Character&, entity::Cursor& cursor, ItemManager&, Canvas& canvas);
+    void update(entity::Character&, entity::Cursor&, ItemManager&, Canvas&, Text&);
   };
 }
