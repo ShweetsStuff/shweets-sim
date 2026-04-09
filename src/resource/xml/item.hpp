@@ -28,7 +28,7 @@ namespace game::resource::xml
     struct Rarity
     {
       std::string name{UNDEFINED};
-      float chance{};
+      float weight{};
       bool isHidden{};
       Audio sound{};
     };
@@ -87,7 +87,7 @@ namespace game::resource::xml
     std::vector<Entry> items{};
     std::vector<Anm2> anm2s{};
 
-    std::vector<int> rarityIDsSortedByChance{};
+    std::vector<int> rarityIDs{};
     std::unordered_map<int, Pool> pools{};
     Pool skillCheckRewardItemPool{};
 

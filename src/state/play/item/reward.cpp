@@ -9,13 +9,27 @@ namespace game::state::play::item
   int Reward::random_item_get(const resource::xml::Item& itemSchema, float chanceBonus)
   {
     const resource::xml::Item::Pool* pool{};
+    auto totalWeight = 0.0f;
 
-    for (auto& id : itemSchema.rarityIDsSortedByChance)
+    for (auto& id : itemSchema.rarityIDs)
     {
       auto& rarity = itemSchema.rarities[id];
-      if (rarity.chance <= 0.0f) continue;
+      if (rarity.weight <= 0.0f) continue;
+      totalWeight += rarity.weight * chanceBonus;
+    }
 
-      if (math::random_percent_roll(rarity.chance * chanceBonus))
+    if (totalWeight <= 0.0f) return INVALID_ID;
+
+    auto roll = math::random_roll(totalWeight);
+
+    for (auto& id : itemSchema.rarityIDs)
+    {
+      auto& rarity = itemSchema.rarities[id];
+      auto weight = rarity.weight * chanceBonus;
+      if (weight <= 0.0f) continue;
+
+      roll -= weight;
+      if (roll <= 0.0f)
       {
         pool = &itemSchema.pools.at(id);
         rarity.sound.play();
@@ -40,8 +54,6 @@ namespace game::state::play::item
                                       const resource::xml::Item& itemSchema, const ImVec4& bounds, float rewardChance,
                                       float rewardRollCount, menu::ItemEffectManager::Mode mode)
   {
-    if (!math::random_percent_roll(rewardChance)) return 0;
-
     auto rollCountWhole = std::max(0, (int)std::floor(rewardRollCount));
     auto rollCountFraction = std::max(0.0f, rewardRollCount - (float)rollCountWhole);
     auto rollCount = rollCountWhole + (math::random_percent_roll(rollCountFraction) ? 1 : 0);
@@ -49,6 +61,8 @@ namespace game::state::play::item
 
     for (int i = 0; i < rollCount; i++)
     {
+      if (!math::random_percent_roll(rewardChance)) continue;
+
       auto itemID = random_item_get(itemSchema);
       if (itemID == INVALID_ID) continue;
 

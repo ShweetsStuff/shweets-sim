@@ -58,7 +58,7 @@ namespace game::resource::xml
           Rarity rarity{};
 
           query_string_attribute(child, "Name", &rarity.name);
-          child->QueryFloatAttribute("Chance", &rarity.chance);
+          child->QueryFloatAttribute("Weight", &rarity.weight);
           query_bool_attribute(child, "IsHidden", &rarity.isHidden);
 
           query_sound(child, "Sound", archive, soundRootPath, rarity.sound);
@@ -183,11 +183,7 @@ namespace game::resource::xml
     }
 
     for (int i = 0; i < (int)rarities.size(); i++)
-    {
-      rarityIDsSortedByChance.emplace_back(i);
-    }
-    std::stable_sort(rarityIDsSortedByChance.begin(), rarityIDsSortedByChance.end(),
-                     [&](int a, int b) { return rarities[a].chance > rarities[b].chance; });
+      rarityIDs.emplace_back(i);
 
     isValid = true;
     logger.info(std::format("Initialized item schema: {}", path.c_str()));
