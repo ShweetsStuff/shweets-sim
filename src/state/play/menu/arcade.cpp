@@ -222,7 +222,7 @@ namespace game::state::play::menu
       {
         case MENU:
           game_menu_draw(ORBIT);
-          game_menu_draw(DUNGEON);
+          //game_menu_draw(DUNGEON);
           game_menu_draw(SKILL_CHECK);
           break;
 
