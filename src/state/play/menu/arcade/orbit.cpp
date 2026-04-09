@@ -262,6 +262,7 @@ namespace game::state::play::menu::arcade
     cursorPosition = {};
     centerPosition = {};
     level = 0;
+    highScoreAtRunStart = highScore;
     score = 0;
     isHighScoreAchievedThisRun = false;
     itemEffectManager = {};
@@ -311,7 +312,8 @@ namespace game::state::play::menu::arcade
     auto padding = ImGui::GetTextLineHeightWithSpacing();
     auto contentRegionAvail = ImGui::GetContentRegionAvail();
     auto contentRegionPosition = ImGui::GetCursorScreenPos();
-    auto contentBounds = ImVec4(contentRegionPosition.x, contentRegionPosition.y, contentRegionAvail.x, contentRegionAvail.y);
+    auto contentBounds =
+        ImVec4(contentRegionPosition.x, contentRegionPosition.y, contentRegionAvail.x, contentRegionAvail.y);
     auto available =
         imgui::to_vec2(contentRegionAvail) - vec2(0.0f, ImGui::GetFrameHeightWithSpacing() + style.WindowPadding.y);
     auto canvasSize = glm::max(vec2(1.0f), available - vec2(padding * 2.0f));
@@ -502,22 +504,17 @@ namespace game::state::play::menu::arcade
                                             rewardChance, rewardRollCount, menu::ItemEffectManager::SHOOT_UP);
         if (score > highScore)
         {
-          auto previousHighScore = highScore;
           highScore = score;
 
-          if (!isHighScoreAchievedThisRun)
+          if (!isHighScoreAchievedThisRun && highScoreAtRunStart > 0)
           {
             isHighScoreAchievedThisRun = true;
             schema.sounds.highScore.play();
-
-            if (previousHighScore > 0)
-            {
-              auto toastText = strings.get(Strings::ArcadeHighScoreToast);
-              auto toastPosition = imgui::to_imvec2(
-                  canvasScreenPosition + player->position -
-                  vec2(ImGui::CalcTextSize(toastText.c_str()).x * 0.5f, ImGui::GetTextLineHeightWithSpacing() * 2.0f));
-              toasts.spawn(toastText, toastPosition, 60);
-            }
+            auto toastText = strings.get(Strings::ArcadeHighScoreToast);
+            auto toastPosition = imgui::to_imvec2(
+                canvasScreenPosition + player->position -
+                vec2(ImGui::CalcTextSize(toastText.c_str()).x * 0.5f, ImGui::GetTextLineHeightWithSpacing() * 2.0f));
+            toasts.spawn(toastText, toastPosition, 60);
           }
         }
       }
@@ -602,8 +599,7 @@ namespace game::state::play::menu::arcade
     toasts.update(drawList);
 
     auto isMenuPressed = WIDGET_FX(ImGui::Button(strings.get(Strings::ArcadeMenuBackButton).c_str()));
-    if (ImGui::IsItemHovered())
-      ImGui::SetItemTooltip("%s", strings.get(Strings::ArcadeMenuBackButtonTooltip).c_str());
+    if (ImGui::IsItemHovered()) ImGui::SetItemTooltip("%s", strings.get(Strings::ArcadeMenuBackButtonTooltip).c_str());
     return isMenuPressed;
   }
 }

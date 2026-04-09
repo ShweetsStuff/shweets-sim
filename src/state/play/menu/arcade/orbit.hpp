@@ -51,6 +51,7 @@ namespace game::state::play::menu::arcade
     int level{1};
     int score{};
     int highScore{};
+    int highScoreAtRunStart{};
     bool isHighScoreAchievedThisRun{};
     menu::ItemEffectManager itemEffectManager{};
     game::state::play::item::Reward itemRewards{};
