@@ -52,15 +52,15 @@ namespace game::resource::xml
         element->QueryIntAttribute("TotalFoodItemsEaten", &totalFoodItemsEaten);
       }
 
-      auto element = root->FirstChildElement("SkillCheck");
-      if (!element) element = root->FirstChildElement("Play");
-      if (element)
+      auto skillCheckElement = root->FirstChildElement("SkillCheck");
+      if (!skillCheckElement) skillCheckElement = root->FirstChildElement("Play");
+      if (skillCheckElement)
       {
-        element->QueryIntAttribute("TotalPlays", &skillCheck.totalPlays);
-        element->QueryIntAttribute("HighScore", &skillCheck.highScore);
-        element->QueryIntAttribute("BestCombo", &skillCheck.bestCombo);
+        skillCheckElement->QueryIntAttribute("TotalPlays", &skillCheck.totalPlays);
+        skillCheckElement->QueryIntAttribute("HighScore", &skillCheck.highScore);
+        skillCheckElement->QueryIntAttribute("BestCombo", &skillCheck.bestCombo);
 
-        if (auto child = element->FirstChildElement("Grades"))
+        if (auto child = skillCheckElement->FirstChildElement("Grades"))
         {
           for (auto gradeChild = child->FirstChildElement("Grade"); gradeChild;
                gradeChild = gradeChild->NextSiblingElement("Grade"))
@@ -72,14 +72,14 @@ namespace game::resource::xml
         }
       }
 
-      if (auto element = root->FirstChildElement("Orbit"))
+      if (auto orbitElement = root->FirstChildElement("Orbit"))
       {
-        element->QueryIntAttribute("HighScore", &orbit.highScore);
+        orbitElement->QueryIntAttribute("HighScore", &orbit.highScore);
       }
 
-      if (auto element = root->FirstChildElement("Inventory"))
+      if (auto inventoryElement = root->FirstChildElement("Inventory"))
       {
-        for (auto child = element->FirstChildElement("Item"); child; child = child->NextSiblingElement("Item"))
+        for (auto child = inventoryElement->FirstChildElement("Item"); child; child = child->NextSiblingElement("Item"))
         {
           int id{};
           int quantity{};
@@ -90,9 +90,9 @@ namespace game::resource::xml
         }
       }
 
-      if (auto element = root->FirstChildElement("Items"))
+      if (auto itemsElement = root->FirstChildElement("Items"))
       {
-        for (auto child = element->FirstChildElement("Item"); child; child = child->NextSiblingElement("Item"))
+        for (auto child = itemsElement->FirstChildElement("Item"); child; child = child->NextSiblingElement("Item"))
         {
           Item item{};
           child->QueryIntAttribute("ID", &item.id);
