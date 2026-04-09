@@ -114,7 +114,9 @@ file(GLOB PROJECT_SRC CONFIGURE_DEPENDS
 	        src/resource/xml/*.cpp
 	        src/state/*.cpp
 	        src/state/play/*.cpp
-	        src/state/play/arcade/*.cpp
+	        src/state/play/menu/*.cpp
+	        src/state/play/menu/arcade/*.cpp
+	        src/state/play/item/*.cpp
 	        src/state/select/*.cpp
 	        src/entity/*.cpp
 	        src/window/*.cpp

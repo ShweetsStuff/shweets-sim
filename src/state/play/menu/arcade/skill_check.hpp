@@ -1,25 +1,26 @@
 #pragma once
 
-#include "../../../render/canvas.hpp"
-#include "../../../entity/actor.hpp"
-#include "../../../entity/character.hpp"
-#include "../../../resources.hpp"
+#include "../item_effect_manager.hpp"
+#include "../../item/reward.hpp"
+#include "../toasts.hpp"
+
+#include "../../../../entity/character.hpp"
+#include "../../../../resources.hpp"
 
 #include "../inventory.hpp"
-#include "../text.hpp"
+#include "../../text.hpp"
 
 #include <imgui.h>
 #include <map>
-#include <unordered_map>
 #include <vector>
 
-namespace game::state::play
+namespace game::state::play::menu::arcade
 {
   class SkillCheck
   {
 
   public:
-    struct Range
+    struct Zone
     {
       float min{};
       float max{};
@@ -27,25 +28,10 @@ namespace game::state::play
 
     struct Challenge
     {
-      Range range{};
+      Zone zone{};
       float speed{};
       float tryValue{};
       int level{};
-    };
-
-    struct Toast
-    {
-      std::string message{};
-      ImVec2 position;
-      int time{};
-      int timeMax{};
-    };
-
-    struct Item
-    {
-      int id{-1};
-      ImVec2 position{};
-      float velocity{};
     };
 
     Challenge challenge{};
@@ -71,17 +57,15 @@ namespace game::state::play
     bool isHighScoreAchievedThisRun{false};
     bool isGameOver{};
 
-    std::vector<Toast> toasts{};
-    std::vector<Item> items{};
-    std::unordered_map<int, entity::Actor> itemActors{};
-    std::unordered_map<int, glm::vec4> itemRects{};
-    std::unordered_map<int, Canvas> itemCanvases{};
+    game::state::play::menu::ItemEffectManager itemEffectManager{};
+    game::state::play::item::Reward itemRewards{};
 
     SkillCheck() = default;
     SkillCheck(entity::Character&);
     Challenge challenge_generate(entity::Character&);
+    void reset(entity::Character&);
     void tick();
-    bool update(Resources&, entity::Character&, Inventory&, Text&);
+    bool update(Resources&, entity::Character&, Inventory&, Text&, Toasts&);
     float accuracy_score_get(entity::Character&);
   };
 }

@@ -5,6 +5,6 @@
 
 namespace game::util::imgui::style
 {
-  void rounding_set(float rounding = 10.0f);
+  void widget_set(float rounding = 10.0f);
   void color_set(glm::vec3 color);
 }

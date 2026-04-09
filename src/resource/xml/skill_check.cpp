@@ -14,7 +14,10 @@ namespace game::resource::xml
   {
     XMLDocument document;
 
-    if (document_load(path, document) != XML_SUCCESS) return;
+    if (document_load(path, document) != XML_SUCCESS)
+    {
+      return;
+    }
 
     auto archive = path.directory_get();
 
@@ -24,11 +27,14 @@ namespace game::resource::xml
       query_string_attribute(root, "SoundRootPath", &soundRootPath);
 
       root->QueryIntAttribute("RewardScore", &rewardScore);
-      root->QueryFloatAttribute("RewardScoreBonus", &rewardScoreBonus);
-      root->QueryFloatAttribute("RewardGradeBonus", &rewardGradeBonus);
-      root->QueryFloatAttribute("RangeBase", &rangeBase);
-      root->QueryFloatAttribute("RangeMin", &rangeMin);
-      root->QueryFloatAttribute("RangeScoreBonus", &rangeScoreBonus);
+      root->QueryFloatAttribute("RewardChanceBase", &rewardChanceBase);
+      root->QueryFloatAttribute("RewardChanceScoreBonus", &rewardChanceScoreBonus);
+      root->QueryFloatAttribute("RewardRollChanceBase", &rewardRollChanceBase);
+      root->QueryFloatAttribute("RewardRollScoreBonus", &rewardRollScoreBonus);
+      root->QueryFloatAttribute("RewardRollGradeBonus", &rewardRollGradeBonus);
+      root->QueryFloatAttribute("ZoneBase", &zoneBase);
+      root->QueryFloatAttribute("ZoneMin", &zoneMin);
+      root->QueryFloatAttribute("ZoneScoreBonus", &zoneScoreBonus);
       root->QueryFloatAttribute("SpeedMin", &speedMin);
       root->QueryFloatAttribute("SpeedMax", &speedMax);
       root->QueryFloatAttribute("SpeedScoreBonus", &speedScoreBonus);

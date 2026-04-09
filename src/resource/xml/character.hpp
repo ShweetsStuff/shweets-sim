@@ -9,8 +9,10 @@
 #include "area.hpp"
 #include "cursor.hpp"
 #include "dialogue.hpp"
+#include "dungeon.hpp"
 #include "item.hpp"
 #include "menu.hpp"
+#include "orbit.hpp"
 #include "save.hpp"
 #include "skill_check.hpp"
 #include "strings.hpp"
@@ -100,6 +102,8 @@ namespace game::resource::xml
     Menu menuSchema{};
     Cursor cursorSchema{};
     SkillCheck skillCheckSchema{};
+    Dungeon dungeonSchema{};
+    Orbit orbitSchema{};
     Strings strings{};
 
     Save save{};

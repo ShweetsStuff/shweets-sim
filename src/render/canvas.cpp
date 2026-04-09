@@ -1,6 +1,7 @@
 #include "canvas.hpp"
 #include <glm/gtc/type_ptr.hpp>
 
+#include <algorithm>
 #include <utility>
 
 #include "../util/imgui.hpp"
@@ -95,7 +96,10 @@ namespace game
   Canvas::Canvas(const Canvas& other) : Canvas(other.size, other.flags)
   {
     pan = other.pan;
+    shakeOffset = other.shakeOffset;
     zoom = other.zoom;
+    shakeTimer = other.shakeTimer;
+    shakeTimerMax = other.shakeTimerMax;
 
     if ((flags & DEFAULT) == 0 && (other.flags & DEFAULT) == 0)
     {
@@ -110,7 +114,10 @@ namespace game
   {
     size = other.size;
     pan = other.pan;
+    shakeOffset = other.shakeOffset;
     zoom = other.zoom;
+    shakeTimer = other.shakeTimer;
+    shakeTimerMax = other.shakeTimerMax;
     flags = other.flags;
     fbo = other.fbo;
     rbo = other.rbo;
@@ -118,7 +125,10 @@ namespace game
 
     other.size = {};
     other.pan = {};
+    other.shakeOffset = {};
     other.zoom = 100.0f;
+    other.shakeTimer = 0;
+    other.shakeTimerMax = 0;
     other.flags = FLIP;
     other.fbo = 0;
     other.rbo = 0;
@@ -156,7 +166,10 @@ namespace game
 
     size = other.size;
     pan = other.pan;
+    shakeOffset = other.shakeOffset;
     zoom = other.zoom;
+    shakeTimer = other.shakeTimer;
+    shakeTimerMax = other.shakeTimerMax;
     flags = other.flags;
     fbo = other.fbo;
     rbo = other.rbo;
@@ -164,7 +177,10 @@ namespace game
 
     other.size = {};
     other.pan = {};
+    other.shakeOffset = {};
     other.zoom = 100.0f;
+    other.shakeTimer = 0;
+    other.shakeTimerMax = 0;
     other.flags = FLIP;
     other.fbo = 0;
     other.rbo = 0;
@@ -242,9 +258,51 @@ namespace game
     glUseProgram(0);
   }
 
+  void Canvas::texture_render(Shader& shader, const Canvas& source, mat4 model, vec4 tint, vec3 colorOffset) const
+  {
+    auto shakenModel = glm::translate(model, glm::vec3(source.shakeOffset, 0.0f));
+    texture_render(shader, source.texture, shakenModel, tint, colorOffset);
+  }
+
   void Canvas::render(Shader& shader, mat4& model, vec4 tint, vec3 colorOffset) const
   {
-    texture_render(shader, texture, model, tint, colorOffset);
+    auto shakenModel = glm::translate(model, glm::vec3(shakeOffset, 0.0f));
+    texture_render(shader, texture, shakenModel, tint, colorOffset);
+  }
+
+  void Canvas::shake(float magnitude, int timeTicks)
+  {
+    shakeTimerMax = std::max(1, timeTicks);
+    shakeTimer = shakeTimerMax;
+    shakeOffset = {math::random_in_range(-magnitude, magnitude), math::random_in_range(-magnitude, magnitude)};
+  }
+
+  void Canvas::tick()
+  {
+    static constexpr auto SHAKE_LERP_FACTOR = 0.35f;
+    static constexpr auto SHAKE_DECAY = 0.85f;
+    static constexpr auto SHAKE_EPSILON = 0.1f;
+
+    if (shakeTimer > 0)
+    {
+      shakeTimer--;
+
+      auto magnitude = glm::length(shakeOffset) * SHAKE_DECAY;
+      auto timerFactor = (float)shakeTimer / (float)std::max(1, shakeTimerMax);
+      auto target =
+          glm::vec2(math::random_in_range(-magnitude, magnitude), math::random_in_range(-magnitude, magnitude)) *
+          timerFactor;
+      shakeOffset = glm::mix(shakeOffset, target, SHAKE_LERP_FACTOR);
+    }
+    else
+    {
+      shakeOffset = glm::mix(shakeOffset, glm::vec2{}, SHAKE_LERP_FACTOR);
+      if (glm::length(shakeOffset) < SHAKE_EPSILON)
+      {
+        shakeOffset = {};
+        shakeTimerMax = 0;
+      }
+    }
   }
 
   void Canvas::bind()

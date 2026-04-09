@@ -153,7 +153,7 @@ namespace game::resource
     internal.reset();
   }
 
-  void Audio::play(bool isLoop)
+  void Audio::play(bool isLoop) const
   {
     if (!internal) return;
 
@@ -186,7 +186,7 @@ namespace game::resource
     if (options) SDL_DestroyProperties(options);
   }
 
-  void Audio::stop()
+  void Audio::stop() const
   {
     if (track) MIX_StopTrack(track, 0);
   }

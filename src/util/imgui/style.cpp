@@ -4,12 +4,15 @@
 
 namespace game::util::imgui::style
 {
-  void rounding_set(float rounding)
+  void widget_set(float rounding)
   {
+    constexpr auto SCROLLBAR_SIZE = 30.0f;
+
     auto& style = ImGui::GetStyle();
     style.WindowRounding = rounding;
     style.FrameRounding = rounding;
     style.GrabRounding = rounding;
+    style.ScrollbarSize = SCROLLBAR_SIZE;
   }
 
   void color_set(glm::vec3 color)

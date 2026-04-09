@@ -14,7 +14,11 @@ namespace game::resource::xml
   {
     XMLDocument document;
 
-    if (document_load(path, document) != XML_SUCCESS) return;
+    if (document_load(path, document) != XML_SUCCESS)
+    {
+      logger.error(std::format("Unable to initialize area schema: {} ({})", path.c_str(), document.ErrorStr()));
+      return;
+    }
 
     auto archive = path.directory_get();
 

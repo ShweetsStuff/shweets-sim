@@ -109,14 +109,65 @@ namespace game::resource::xml
 
     struct FrameOptional
     {
-      std::optional<glm::vec2> crop{};
-      std::optional<glm::vec2> position{};
-      std::optional<glm::vec2> pivot{};
-      std::optional<glm::vec2> size{};
-      std::optional<glm::vec2> scale{};
+      struct Vec2
+      {
+        std::optional<float> x{};
+        std::optional<float> y{};
+
+        Vec2() = default;
+        Vec2(const glm::vec2& value) : x(value.x), y(value.y) {}
+        Vec2& operator=(const glm::vec2& value)
+        {
+          x = value.x;
+          y = value.y;
+          return *this;
+        }
+      };
+
+      struct Vec3
+      {
+        std::optional<float> x{};
+        std::optional<float> y{};
+        std::optional<float> z{};
+
+        Vec3() = default;
+        Vec3(const glm::vec3& value) : x(value.x), y(value.y), z(value.z) {}
+        Vec3& operator=(const glm::vec3& value)
+        {
+          x = value.x;
+          y = value.y;
+          z = value.z;
+          return *this;
+        }
+      };
+
+      struct Vec4
+      {
+        std::optional<float> x{};
+        std::optional<float> y{};
+        std::optional<float> z{};
+        std::optional<float> w{};
+
+        Vec4() = default;
+        Vec4(const glm::vec4& value) : x(value.x), y(value.y), z(value.z), w(value.w) {}
+        Vec4& operator=(const glm::vec4& value)
+        {
+          x = value.x;
+          y = value.y;
+          z = value.z;
+          w = value.w;
+          return *this;
+        }
+      };
+
+      Vec2 crop{};
+      Vec2 position{};
+      Vec2 pivot{};
+      Vec2 size{};
+      Vec2 scale{};
       std::optional<float> rotation{};
-      std::optional<glm::vec4> tint{};
-      std::optional<glm::vec3> colorOffset{};
+      Vec4 tint{};
+      Vec3 colorOffset{};
       std::optional<bool> isInterpolated{};
       std::optional<bool> isVisible{};
     };

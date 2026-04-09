@@ -12,14 +12,13 @@ namespace game::state::play
   void Debug::update(entity::Character& character, entity::Cursor& cursor, ItemManager& itemManager, Canvas& canvas,
                      Text& text)
   {
-    auto& strings = character.data.strings;
     auto cursorPosition = canvas.screen_position_convert(cursor.position);
 
-    ImGui::Text(strings.get(Strings::DebugCursorScreenFormat).c_str(), cursor.position.x, cursor.position.y);
-    ImGui::Text(strings.get(Strings::DebugCursorWorldFormat).c_str(), cursorPosition.x, cursorPosition.y);
+    ImGui::Text("Cursor Pos (Screen): %0.0f, %0.0f", cursor.position.x, cursor.position.y);
+    ImGui::Text("Cursor Pos (World): %0.0f, %0.0f", cursorPosition.x, cursorPosition.y);
 
-    ImGui::SeparatorText(strings.get(Strings::DebugAnimations).c_str());
-    ImGui::Text(strings.get(Strings::DebugNowPlayingFormat).c_str(), character.animationMapReverse.at(character.animationIndex).c_str());
+    ImGui::SeparatorText("Animations");
+    ImGui::Text("Now Playing: %s", character.animationMapReverse.at(character.animationIndex).c_str());
 
     auto childSize = ImVec2(0, ImGui::GetContentRegionAvail().y / 3);
 
@@ -37,7 +36,7 @@ namespace game::state::play
     }
     ImGui::EndChild();
 
-    ImGui::SeparatorText(strings.get(Strings::DebugDialogue).c_str());
+    ImGui::SeparatorText("Dialogue");
 
     if (ImGui::BeginChild("##Dialogue", childSize, ImGuiChildFlags_Borders))
     {
@@ -52,21 +51,21 @@ namespace game::state::play
     }
     ImGui::EndChild();
 
-    WIDGET_FX(ImGui::Checkbox(strings.get(Strings::DebugShowNulls).c_str(), &character.isShowNulls));
-    WIDGET_FX(ImGui::Checkbox(strings.get(Strings::DebugShowWorldBounds).c_str(), &isBoundsDisplay));
+    WIDGET_FX(ImGui::Checkbox("Show Nulls (Hitboxes)", &character.isShowNulls));
+    WIDGET_FX(ImGui::Checkbox("Show World Bounds", &isBoundsDisplay));
 
     if (!itemManager.items.empty())
     {
-      ImGui::SeparatorText(strings.get(Strings::DebugItem).c_str());
+      ImGui::SeparatorText("Item");
 
       for (int i = 0; i < (int)itemManager.items.size(); i++)
       {
         auto& item = itemManager.items[i];
-        if (itemManager.heldItemIndex == i) ImGui::TextUnformatted(strings.get(Strings::DebugHeld).c_str());
-        ImGui::Text(strings.get(Strings::DebugItemTypeFormat).c_str(), item.schemaID);
-        ImGui::Text(strings.get(Strings::DebugItemPositionFormat).c_str(), item.position.x, item.position.y);
-        ImGui::Text(strings.get(Strings::DebugItemVelocityFormat).c_str(), item.velocity.x, item.velocity.y);
-        ImGui::Text(strings.get(Strings::DebugItemDurabilityFormat).c_str(), item.durability);
+        if (itemManager.heldItemIndex == i) ImGui::TextUnformatted("Held");
+        ImGui::Text("Type: %i", item.schemaID);
+        ImGui::Text("Position: %0.0f, %0.0f", item.position.x, item.position.y);
+        ImGui::Text("Velocity: %0.0f, %0.0f", item.velocity.x, item.velocity.y);
+        ImGui::Text("Durability: %i", item.durability);
         ImGui::Separator();
       }
     }

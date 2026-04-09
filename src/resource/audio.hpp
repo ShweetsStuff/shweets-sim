@@ -14,7 +14,7 @@ namespace game::resource
     void unload();
 
     std::shared_ptr<MIX_Audio> internal{};
-    MIX_Track* track{nullptr};
+    mutable MIX_Track* track{nullptr};
 
   public:
     Audio() = default;
@@ -26,8 +26,8 @@ namespace game::resource
     Audio& operator=(Audio&&) noexcept;
     ~Audio();
     bool is_valid() const;
-    void play(bool isLoop = false);
-    void stop();
+    void play(bool isLoop = false) const;
+    void stop() const;
     bool is_playing() const;
     static void volume_set(float volume);
   };

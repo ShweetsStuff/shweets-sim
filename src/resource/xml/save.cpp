@@ -56,9 +56,9 @@ namespace game::resource::xml
       if (!element) element = root->FirstChildElement("Play");
       if (element)
       {
-        element->QueryIntAttribute("TotalPlays", &totalPlays);
-        element->QueryIntAttribute("HighScore", &highScore);
-        element->QueryIntAttribute("BestCombo", &bestCombo);
+        element->QueryIntAttribute("TotalPlays", &skillCheck.totalPlays);
+        element->QueryIntAttribute("HighScore", &skillCheck.highScore);
+        element->QueryIntAttribute("BestCombo", &skillCheck.bestCombo);
 
         if (auto child = element->FirstChildElement("Grades"))
         {
@@ -67,9 +67,14 @@ namespace game::resource::xml
           {
             int id{};
             gradeChild->QueryIntAttribute("ID", &id);
-            gradeChild->QueryIntAttribute("Count", &gradeCounts[id]);
+            gradeChild->QueryIntAttribute("Count", &skillCheck.gradeCounts[id]);
           }
         }
+      }
+
+      if (auto element = root->FirstChildElement("Orbit"))
+      {
+        element->QueryIntAttribute("HighScore", &orbit.highScore);
       }
 
       if (auto element = root->FirstChildElement("Inventory"))
@@ -132,18 +137,21 @@ namespace game::resource::xml
 
     auto skillCheckElement = element->InsertNewChildElement("SkillCheck");
 
-    skillCheckElement->SetAttribute("TotalPlays", totalPlays);
-    skillCheckElement->SetAttribute("HighScore", highScore);
-    skillCheckElement->SetAttribute("BestCombo", bestCombo);
+    skillCheckElement->SetAttribute("TotalPlays", skillCheck.totalPlays);
+    skillCheckElement->SetAttribute("HighScore", skillCheck.highScore);
+    skillCheckElement->SetAttribute("BestCombo", skillCheck.bestCombo);
 
     auto gradesElement = skillCheckElement->InsertNewChildElement("Grades");
 
-    for (auto& [i, count] : gradeCounts)
+    for (auto& [i, count] : skillCheck.gradeCounts)
     {
       auto gradeElement = gradesElement->InsertNewChildElement("Grade");
       gradeElement->SetAttribute("ID", i);
       gradeElement->SetAttribute("Count", count);
     }
+
+    auto orbitElement = element->InsertNewChildElement("Orbit");
+    orbitElement->SetAttribute("HighScore", orbit.highScore);
 
     auto inventoryElement = element->InsertNewChildElement("Inventory");
 

@@ -1,10 +1,10 @@
 #pragma once
 
-#include "text.hpp"
+#include "../text.hpp"
 
 #include <imgui.h>
 
-namespace game::state::play
+namespace game::state::play::menu
 {
   class Interact
   {

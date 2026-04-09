@@ -47,7 +47,11 @@ namespace game::resource::xml
 
     XMLDocument document;
 
-    if (document_load(path, document) != XML_SUCCESS) return;
+    if (document_load(path, document) != XML_SUCCESS)
+    {
+      logger.error(std::format("Unable to initialize dialogue: {} ({})", path.c_str(), document.ErrorStr()));
+      return;
+    }
 
     if (auto root = document.RootElement())
     {

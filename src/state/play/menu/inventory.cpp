@@ -1,16 +1,16 @@
 #include "inventory.hpp"
-#include "style.hpp"
+#include "../style.hpp"
 
 #include <cmath>
 #include <format>
 #include <ranges>
 #include <tuple>
 
-#include "../../util/color.hpp"
-#include "../../util/imgui.hpp"
-#include "../../util/imgui/style.hpp"
-#include "../../util/imgui/widget.hpp"
-#include "../../util/math.hpp"
+#include "../../../util/color.hpp"
+#include "../../../util/imgui.hpp"
+#include "../../../util/imgui/style.hpp"
+#include "../../../util/imgui/widget.hpp"
+#include "../../../util/math.hpp"
 
 using namespace game::util;
 using namespace game::util::imgui;
@@ -18,7 +18,7 @@ using namespace game::entity;
 using namespace game::resource;
 using namespace glm;
 
-namespace game::state::play
+namespace game::state::play::menu
 {
   using Strings = resource::xml::Strings;
 

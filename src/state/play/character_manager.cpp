@@ -14,17 +14,22 @@ namespace game::state::play
   {
     auto interact_area_override_tick = [](entity::Actor::Override& override_)
     {
-      if (override_.frame.scale.has_value() && override_.frameBase.scale.has_value() && override_.time.has_value() &&
-          override_.timeStart.has_value())
+      auto& scale = override_.frame.scale;
+      auto& scaleBase = override_.frameBase.scale;
+      auto isScaleValid = scale.x.has_value() && scale.y.has_value() && scaleBase.x.has_value() && scaleBase.y.has_value();
+
+      if (isScaleValid && override_.time.has_value() && override_.timeStart.has_value())
       {
         auto percent = glm::clamp(*override_.time / *override_.timeStart, 0.0f, 1.0f);
         auto elapsed = 1.0f - percent;
 
         auto oscillation = cosf(elapsed * glm::tau<float>() * override_.cycles);
         auto envelope = percent;
-        auto amplitude = glm::abs(*override_.frameBase.scale);
+        auto amplitude = glm::abs(glm::vec2(*scaleBase.x, *scaleBase.y));
+        auto value = amplitude * (oscillation * envelope);
 
-        *override_.frame.scale = amplitude * (oscillation * envelope);
+        scale.x = value.x;
+        scale.y = value.y;
       }
     };
 

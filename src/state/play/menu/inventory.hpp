@@ -1,14 +1,14 @@
 #pragma once
 
-#include "../../entity/character.hpp"
+#include "../../../entity/character.hpp"
 
-#include "../../resources.hpp"
+#include "../../../resources.hpp"
 
-#include "item_manager.hpp"
+#include "../item_manager.hpp"
 
 #include <imgui.h>
 
-namespace game::state::play
+namespace game::state::play::menu
 {
   class Inventory
   {

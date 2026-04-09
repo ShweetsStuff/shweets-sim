@@ -229,6 +229,16 @@ namespace game::resource::xml
     else
       logger.warning(std::format("No character skill_check.xml file found: {}", path.string()));
 
+    if (auto dungeonSchemaPath = physfs::Path(archive + "/" + "dungeon.xml"); dungeonSchemaPath.is_valid())
+      dungeonSchema = Dungeon(dungeonSchemaPath);
+    else
+      logger.warning(std::format("No character dungeon.xml file found: {}", path.string()));
+
+    if (auto orbitSchemaPath = physfs::Path(archive + "/" + "orbit.xml"); orbitSchemaPath.is_valid())
+      orbitSchema = Orbit(orbitSchemaPath, dialogue);
+    else
+      logger.warning(std::format("No character orbit.xml file found: {}", path.string()));
+
     if (auto stringsPath = physfs::Path(archive + "/" + "strings.xml"); stringsPath.is_valid())
       strings = Strings(stringsPath);
 

@@ -201,7 +201,7 @@ namespace game
     logger.info("Initialized Dear ImGui OpenGL backend");
 
     imgui::style::color_set(settings.color);
-    imgui::style::rounding_set();
+    imgui::style::widget_set();
     math::random_seed_set();
     resource::Audio::volume_set((float)settings.volume / 100);
   }

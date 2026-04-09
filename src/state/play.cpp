@@ -75,7 +75,7 @@ namespace game::state
     cursor = entity::Cursor(character.data.cursorSchema.anm2);
     cursor.interactTypeID = character.data.interactTypeNames.empty() ? -1 : 0;
 
-    menu.inventory = Inventory{};
+    menu.inventory = play::menu::Inventory{};
     for (auto& [id, quantity] : saveData.inventory)
     {
       if (quantity == 0) continue;
@@ -94,16 +94,17 @@ namespace game::state
                                      item.rotation);
     }
 
-    imgui::style::rounding_set(menuSchema.rounding);
+    imgui::style::widget_set(menuSchema.rounding);
     imgui::widget::sounds_set(&menuSchema.sounds.hover, &menuSchema.sounds.select);
     play::style::color_set(resources, character);
 
-    menu.arcade = Arcade(character);
-    menu.arcade.skillCheck.totalPlays = saveData.totalPlays;
-    menu.arcade.skillCheck.highScore = saveData.highScore;
-    menu.arcade.skillCheck.bestCombo = saveData.bestCombo;
-    menu.arcade.skillCheck.gradeCounts = saveData.gradeCounts;
-    menu.arcade.skillCheck.isHighScoreAchieved = saveData.highScore > 0 ? true : false;
+    menu.arcade = play::menu::Arcade(character);
+    menu.arcade.skillCheck.totalPlays = saveData.skillCheck.totalPlays;
+    menu.arcade.skillCheck.highScore = saveData.skillCheck.highScore;
+    menu.arcade.skillCheck.bestCombo = saveData.skillCheck.bestCombo;
+    menu.arcade.skillCheck.gradeCounts = saveData.skillCheck.gradeCounts;
+    menu.arcade.skillCheck.isHighScoreAchieved = saveData.skillCheck.highScore > 0 ? true : false;
+    menu.arcade.orbit.highScore = saveData.orbit.highScore;
 
     text.entry = nullptr;
     text.isEnabled = false;
@@ -153,7 +154,7 @@ namespace game::state
   void Play::exit(Resources& resources)
   {
     imgui::style::color_set(resources.settings.color);
-    imgui::style::rounding_set();
+    imgui::style::widget_set();
     imgui::widget::sounds_set(nullptr, nullptr);
     ImGui::GetIO().FontDefault = resources.font.get();
     save(resources);
@@ -182,6 +183,7 @@ namespace game::state
 
     auto focus = focus_get();
     auto& dialogue = character.data.dialogue;
+    cursor.isVisible = true;
 
     if (!menu.isCheats)
     {
@@ -298,6 +300,7 @@ namespace game::state
     character.update();
     cursor.update();
     world.update(character, cursor, worldCanvas, focus);
+    worldCanvas.tick();
 
     if (autosaveTime += ImGui::GetIO().DeltaTime; autosaveTime > AUTOSAVE_TIME || menu.settingsMenu.isSave)
     {
@@ -337,7 +340,7 @@ namespace game::state
     worldCanvas.unbind();
 
     canvas.bind();
-    canvas.texture_render(textureShader, worldCanvas.texture, windowModel);
+    canvas.texture_render(textureShader, worldCanvas, windowModel);
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     cursor.render(textureShader, rectShader, canvas);
@@ -358,10 +361,11 @@ namespace game::state
     save.digestionTimer = character.digestionTimer;
     save.totalCaloriesConsumed = character.totalCaloriesConsumed;
     save.totalFoodItemsEaten = character.totalFoodItemsEaten;
-    save.totalPlays = menu.arcade.skillCheck.totalPlays;
-    save.highScore = menu.arcade.skillCheck.highScore;
-    save.bestCombo = menu.arcade.skillCheck.bestCombo;
-    save.gradeCounts = menu.arcade.skillCheck.gradeCounts;
+    save.skillCheck.totalPlays = menu.arcade.skillCheck.totalPlays;
+    save.skillCheck.highScore = menu.arcade.skillCheck.highScore;
+    save.skillCheck.bestCombo = menu.arcade.skillCheck.bestCombo;
+    save.skillCheck.gradeCounts = menu.arcade.skillCheck.gradeCounts;
+    save.orbit.highScore = menu.arcade.orbit.highScore;
     save.isPostgame = isPostgame;
     save.isAlternateSpritesheet = character.spritesheetType == entity::Character::ALTERNATE;
 

@@ -3,7 +3,6 @@
 #include "style.hpp"
 
 #include "../../util/imgui.hpp"
-#include "../../util/imgui/style.hpp"
 #include "../../util/imgui/widget.hpp"
 
 #include <algorithm>
@@ -68,7 +67,7 @@ namespace game::state::play
 
           if (WIDGET_FX(ImGui::BeginTabItem(strings.get(Strings::MenuTabArcade).c_str())))
           {
-            arcade.update(resources, character, inventory, text);
+            arcade.update(resources, character, cursor, inventory, text, toasts);
             ImGui::EndTabItem();
           }
 
@@ -92,7 +91,7 @@ namespace game::state::play
           }
 
 #if DEBUG
-          if (WIDGET_FX(ImGui::BeginTabItem(strings.get(Strings::MenuTabDebug).c_str())))
+          if (WIDGET_FX(ImGui::BeginTabItem("Debug")))
           {
             debug.update(character, cursor, itemManager, canvas, text);
             ImGui::EndTabItem();
@@ -121,9 +120,7 @@ namespace game::state::play
 
       if (t <= 0.0f || t >= 1.0f)
       {
-        ImGui::SetItemTooltip("%s", strings.get(isOpen ? Strings::MenuCloseTooltip
-                                                       : Strings::MenuOpenTooltip)
-                                        .c_str());
+        ImGui::SetItemTooltip("%s", strings.get(isOpen ? Strings::MenuCloseTooltip : Strings::MenuOpenTooltip).c_str());
         if (result)
         {
           isOpen = !isOpen;

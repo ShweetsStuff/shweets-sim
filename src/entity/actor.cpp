@@ -143,6 +143,30 @@ namespace game::entity
 
     auto override_handle = [&](Anm2::Frame& overrideFrame)
     {
+      auto vec2_set = [](glm::vec2& destination, const Anm2::FrameOptional::Vec2& source)
+      {
+        if (source.x.has_value()) destination.x = *source.x;
+        if (source.y.has_value()) destination.y = *source.y;
+      };
+      auto vec2_add = [](glm::vec2& destination, const Anm2::FrameOptional::Vec2& source)
+      {
+        if (source.x.has_value()) destination.x += *source.x;
+        if (source.y.has_value()) destination.y += *source.y;
+      };
+      auto vec3_set = [](glm::vec3& destination, const Anm2::FrameOptional::Vec3& source)
+      {
+        if (source.x.has_value()) destination.x = *source.x;
+        if (source.y.has_value()) destination.y = *source.y;
+        if (source.z.has_value()) destination.z = *source.z;
+      };
+      auto vec4_set = [](glm::vec4& destination, const Anm2::FrameOptional::Vec4& source)
+      {
+        if (source.x.has_value()) destination.x = *source.x;
+        if (source.y.has_value()) destination.y = *source.y;
+        if (source.z.has_value()) destination.z = *source.z;
+        if (source.w.has_value()) destination.w = *source.w;
+      };
+
       for (auto& override : overrides)
       {
         if (override.type != type) continue;
@@ -153,19 +177,19 @@ namespace game::entity
         switch (override.mode)
         {
           case Override::SET:
-            if (source.position.has_value()) overrideFrame.position = *source.position;
-            if (source.pivot.has_value()) overrideFrame.pivot = *source.pivot;
-            if (source.size.has_value()) overrideFrame.size = *source.size;
-            if (source.scale.has_value()) overrideFrame.scale = *source.scale;
-            if (source.crop.has_value()) overrideFrame.crop = *source.crop;
+            vec2_set(overrideFrame.position, source.position);
+            vec2_set(overrideFrame.pivot, source.pivot);
+            vec2_set(overrideFrame.size, source.size);
+            vec2_set(overrideFrame.scale, source.scale);
+            vec2_set(overrideFrame.crop, source.crop);
             if (source.rotation.has_value()) overrideFrame.rotation = *source.rotation;
-            if (source.tint.has_value()) overrideFrame.tint = *source.tint;
-            if (source.colorOffset.has_value()) overrideFrame.colorOffset = *source.colorOffset;
+            vec4_set(overrideFrame.tint, source.tint);
+            vec3_set(overrideFrame.colorOffset, source.colorOffset);
             if (source.isInterpolated.has_value()) overrideFrame.isInterpolated = *source.isInterpolated;
             if (source.isVisible.has_value()) overrideFrame.isVisible = *source.isVisible;
             break;
           case Override::ADD:
-            if (source.scale.has_value()) overrideFrame.scale += *source.scale;
+            vec2_add(overrideFrame.scale, source.scale);
             break;
           default:
             break;
@@ -344,6 +368,8 @@ namespace game::entity
 
   void Actor::render(resource::Shader& textureShader, resource::Shader& rectShader, Canvas& canvas)
   {
+    if (!isVisible) return;
+
     auto animation = animation_get();
     if (!animation) return;
 

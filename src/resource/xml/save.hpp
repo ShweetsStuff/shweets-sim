@@ -12,6 +12,19 @@ namespace game::resource::xml
   class Save
   {
   public:
+    struct SkillCheck
+    {
+      int totalPlays{};
+      int highScore{};
+      int bestCombo{};
+      std::map<int, int> gradeCounts{};
+    };
+
+    struct Orbit
+    {
+      int highScore{};
+    };
+
     struct Item
     {
       int id{};
@@ -34,10 +47,8 @@ namespace game::resource::xml
 
     float totalCaloriesConsumed{};
     int totalFoodItemsEaten{};
-    int totalPlays{};
-    int highScore{};
-    int bestCombo{};
-    std::map<int, int> gradeCounts{};
+    SkillCheck skillCheck{};
+    Orbit orbit{};
 
     std::map<int, int> inventory;
     std::vector<Item> items;

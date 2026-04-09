@@ -1,14 +1,14 @@
 #include "interact.hpp"
 
-#include "../../util/imgui/widget.hpp"
-#include "../../util/measurement.hpp"
+#include "../../../util/imgui/widget.hpp"
+#include "../../../util/measurement.hpp"
 
 using namespace game::resource;
 using namespace game::resource::xml;
 using namespace game::util;
 using namespace game::util::imgui;
 
-namespace game::state::play
+namespace game::state::play::menu
 {
   void Interact::update(Resources& resources, Text& text, entity::Character& character)
   {

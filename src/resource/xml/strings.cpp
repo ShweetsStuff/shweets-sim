@@ -31,7 +31,11 @@ namespace game::resource::xml
       values[i] = definitions[i].fallback;
 
     XMLDocument document;
-    if (document_load(path, document) != XML_SUCCESS) return;
+    if (document_load(path, document) != XML_SUCCESS)
+    {
+      logger.error(std::format("Unable to initialize strings: {} ({})", path.c_str(), document.ErrorStr()));
+      return;
+    }
 
     auto root = document.RootElement();
     if (!root) return;

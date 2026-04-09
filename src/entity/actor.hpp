@@ -72,6 +72,7 @@ namespace game::entity
     glm::vec2 position{};
     float time{};
     bool isShowNulls{};
+    bool isVisible{true};
     int animationIndex{-1};
     int playedEventID{-1};
     float startTime{};

@@ -31,6 +31,8 @@ namespace game
 
   public:
     static constexpr glm::vec4 CLEAR_COLOR = {0, 0, 0, 0};
+    static constexpr float SHAKE_MAGNITUDE = 0.05f;
+    static constexpr float SHAKE_TIME_TICKS = 60;
 
     enum Flag
     {
@@ -46,7 +48,10 @@ namespace game
 
     glm::ivec2 size{};
     glm::vec2 pan{};
+    glm::vec2 shakeOffset{};
     float zoom{100.0f};
+    int shakeTimer{};
+    int shakeTimerMax{};
     Flags flags{FLIP};
 
     Canvas() = default;
@@ -64,6 +69,8 @@ namespace game
     void texture_render(resource::Shader&, const Canvas&, glm::mat4, glm::vec4 = glm::vec4(1.0f), glm::vec3 = {}) const;
     void rect_render(resource::Shader&, glm::mat4&, glm::vec4 = glm::vec4(0, 0, 1, 1)) const;
     void render(resource::Shader&, glm::mat4&, glm::vec4 = glm::vec4(1.0f), glm::vec3 = {}) const;
+    void shake(float magnitude = SHAKE_MAGNITUDE, int timeTicks = SHAKE_TIME_TICKS);
+    void tick();
     void bind();
     void size_set(glm::ivec2 size);
     void clear(glm::vec4 color = CLEAR_COLOR);

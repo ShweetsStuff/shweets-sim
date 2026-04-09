@@ -12,7 +12,7 @@ using namespace game::resource::xml;
 
 namespace game::state::play
 {
-  void Cheats::update(Resources&, entity::Character& character, Inventory& inventory)
+  void Cheats::update(Resources&, entity::Character& character, menu::Inventory& inventory)
   {
     auto& strings = character.data.strings;
 
