@@ -29,6 +29,7 @@ namespace game::state::play
 
     auto style = ImGui::GetStyle();
     auto& io = ImGui::GetIO();
+    isDebugOpen = false;
 
     slide.update(isOpen, io.DeltaTime);
 
@@ -93,6 +94,7 @@ namespace game::state::play
 #if DEBUG
           if (WIDGET_FX(ImGui::BeginTabItem("Debug")))
           {
+            isDebugOpen = true;
             debug.update(character, cursor, itemManager, canvas, text);
             ImGui::EndTabItem();
           }

@@ -35,6 +35,7 @@ namespace game::state::play
 #endif
 
     bool isOpen{true};
+    bool isDebugOpen{};
     util::imgui::WindowSlide slide{};
 
     void tick();

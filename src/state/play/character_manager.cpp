@@ -39,6 +39,15 @@ namespace game::state::play
     auto isMouseLeftReleased = ImGui::IsMouseReleased(ImGuiMouseButton_Left);
     auto isImguiCaptureMouse = ImGui::GetIO().WantCaptureMouse;
 
+    if (isDisabled)
+    {
+      isInteracting = false;
+      isHoldInteracting = false;
+      isHovering = false;
+      interactAreaID = -1;
+      return;
+    }
+
     isInteractingPrevious = isInteracting;
     isHoveringPrevious = isHovering;
     isHoldInteractingPrevious = isHoldInteracting;

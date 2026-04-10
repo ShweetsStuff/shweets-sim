@@ -14,6 +14,8 @@ namespace game::state::play
   {
   public:
     bool isBoundsDisplay{};
+    bool isStartSequenceRequested{};
+    bool isEndSequenceRequested{};
 
     void update(entity::Character&, entity::Cursor&, ItemManager&, Canvas&, Text&);
   };

@@ -67,5 +67,7 @@ namespace game::state
     void render(Resources&, Canvas&);
     void save(Resources&);
     play::World::Focus focus_get();
+    void start_sequence_begin();
+    void end_sequence_begin();
   };
 };

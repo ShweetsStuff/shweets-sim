@@ -41,6 +41,33 @@ namespace game::state
                                        : World::CENTER;
   }
 
+  void Play::start_sequence_begin()
+  {
+    auto& dialogue = character.data.dialogue;
+    if (!dialogue.start.is_valid()) return;
+
+    character.queue_play({.animation = dialogue.start.animation, .isInterruptible = false});
+    character.tick();
+    text.entry = nullptr;
+    text.isEnabled = false;
+    isWindows = false;
+    isStart = true;
+    isStartBegin = false;
+    isStartEnd = false;
+  }
+
+  void Play::end_sequence_begin()
+  {
+    auto& dialogue = character.data.dialogue;
+    if (!dialogue.end.is_valid()) return;
+
+    text.entry = nullptr;
+    text.isEnabled = false;
+    isEnd = true;
+    isEndBegin = false;
+    isEndEnd = false;
+  }
+
   void Play::set(Resources& resources, int selectedCharacterIndex, enum Game game)
   {
     auto& data = resources.character_get(selectedCharacterIndex);
@@ -128,14 +155,7 @@ namespace game::state
     worldCanvas.size_set(imgui::to_vec2(ImGui::GetMainViewport()->Size));
     world.set(character, worldCanvas, focus_get());
 
-    if (game == NEW_GAME && dialogue.start.is_valid())
-    {
-      character.queue_play({.animation = dialogue.start.animation, .isInterruptible = false});
-      character.tick();
-      isStart = true;
-      isStartBegin = false;
-      isStartEnd = false;
-    }
+    if (game == NEW_GAME && dialogue.start.is_valid()) start_sequence_begin();
 
     if (isPostgame)
     {
@@ -230,7 +250,26 @@ namespace game::state
       tools.update(character, cursor, world, focus, worldCanvas);
       info.update(resources, character);
       toasts.update();
+
+#if DEBUG
+      if (menu.isDebugOpen && ImGui::IsKeyPressed(ImGuiKey_F8, false)) end_sequence_begin();
+#endif
+
+      if (menu.debug.isStartSequenceRequested)
+      {
+        menu.debug.isStartSequenceRequested = false;
+        start_sequence_begin();
+      }
+      if (menu.debug.isEndSequenceRequested)
+      {
+        menu.debug.isEndSequenceRequested = false;
+        end_sequence_begin();
+      }
     }
+
+    auto isEndSequenceActive = isEndBegin && !isEndEnd;
+    itemManager.isDisabled = isEndSequenceActive;
+    characterManager.isDisabled = isEndSequenceActive;
 
     if (text.isEnabled) text.update(character);
 
@@ -274,7 +313,6 @@ namespace game::state
           menu.isOpen = false;
           character.calories = 0;
           character.digestionProgress = 0;
-          itemManager.items.clear();
           itemManager.heldItemIndex = -1;
           world.character_focus(character, worldCanvas, focus_get());
         }

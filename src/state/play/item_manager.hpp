@@ -14,6 +14,7 @@ namespace game::state::play
   public:
     static constexpr auto LIMIT = 100;
 
+    bool isDisabled{};
     std::vector<entity::Item> items{};
     int heldItemIndex{-1};
     int queuedRemoveItemIndex{-1};

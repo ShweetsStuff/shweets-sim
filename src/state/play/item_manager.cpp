@@ -57,6 +57,24 @@ namespace game::state::play
 
     auto& io = ImGui::GetIO();
 
+    if (isDisabled)
+    {
+      if (heldItemIndex != -1)
+      {
+        heldItemIndex = -1;
+        isJustItemHeldStopped = true;
+      }
+      isItemHovered = false;
+      isItemHeld = false;
+      isJustItemHeld = false;
+      isMouseLeftClicked = false;
+      isMouseLeftDown = false;
+      isMouseLeftReleased = false;
+      isMouseRightClicked = false;
+      isMouseRightDown = false;
+      isImguiCaptureMouse = true;
+    }
+
     if (isJustItemHoveredStopped)
     {
       cursor.queue_default_animation();

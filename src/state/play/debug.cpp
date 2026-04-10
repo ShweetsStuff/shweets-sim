@@ -38,6 +38,11 @@ namespace game::state::play
 
     ImGui::SeparatorText("Dialogue");
 
+    if (character.data.dialogue.start.is_valid())
+      if (WIDGET_FX(ImGui::Button("Play Start Sequence"))) isStartSequenceRequested = true;
+    if (character.data.dialogue.end.is_valid())
+      if (WIDGET_FX(ImGui::Button("Play End Sequence"))) isEndSequenceRequested = true;
+
     if (ImGui::BeginChild("##Dialogue", childSize, ImGuiChildFlags_Borders))
     {
       for (int i = 0; i < (int)character.data.dialogue.entries.size(); i++)

@@ -9,6 +9,7 @@ namespace game::state::play
   class CharacterManager
   {
   public:
+    bool isDisabled{};
     bool isInteracting{};
     bool isHovering{};
     bool isInteractingPrevious{};
