@@ -19,26 +19,25 @@ namespace game::state::play
     if (ImGui::BeginChild("##Cheats"))
     {
       auto stage = character.stage + 1;
-      auto caloriesMin = 0.0;
-      auto maxCapacity = character.max_capacity();
-      auto capacityMin = character.data.capacityMin;
-      auto capacityMax = character.data.capacityMax;
-      auto weightMin = character.data.weight;
-      auto weightMax = character.data.weightMax;
-      auto digestionRateMin = character.data.digestionRateMin;
-      auto digestionRateMax = character.data.digestionRateMax;
-      auto eatSpeedMin = character.data.eatSpeedMin;
-      auto eatSpeedMax = character.data.eatSpeedMax;
+      auto maxCapacity = (float)character.max_capacity();
+      auto capacityMin = (float)character.data.capacityMin;
+      auto capacityMax = (float)character.data.capacityMax;
+      auto weightMin = (float)character.data.weight;
+      auto weightMax = (float)character.data.weightMax;
+      auto digestionRateMin = (float)character.data.digestionRateMin;
+      auto digestionRateMax = (float)character.data.digestionRateMax;
+      auto eatSpeedMin = (float)character.data.eatSpeedMin;
+      auto eatSpeedMax = (float)character.data.eatSpeedMax;
 
       auto weight_update = [&]() { character.queue_idle_animation(); };
 
-      WIDGET_FX(ImGui::SliderScalar(strings.get(Strings::CheatsCalories).c_str(), ImGuiDataType_Double,
-                                    &character.calories, &caloriesMin, &maxCapacity, "%0.0f kcal"));
-      WIDGET_FX(ImGui::SliderScalar(strings.get(Strings::CheatsCapacity).c_str(), ImGuiDataType_Double,
-                                    &character.capacity, &capacityMin, &capacityMax, "%0.0f kcal"));
+      WIDGET_FX(ImGui::SliderFloat(strings.get(Strings::CheatsCalories).c_str(), &character.calories, 0.0f, maxCapacity,
+                                   "%0.0f kcal"));
+      WIDGET_FX(ImGui::SliderFloat(strings.get(Strings::CheatsCapacity).c_str(), &character.capacity, capacityMin,
+                                   capacityMax, "%0.0f kcal"));
 
-      if (WIDGET_FX(ImGui::SliderScalar(strings.get(Strings::CheatsWeight).c_str(), ImGuiDataType_Double,
-                                        &character.weight, &weightMin, &weightMax,
+      if (WIDGET_FX(ImGui::SliderFloat(strings.get(Strings::CheatsWeight).c_str(), &character.weight, weightMin,
+                                       weightMax,
                                         strings.get(Strings::CheatsWeightFormat).c_str())))
         weight_update();
 
@@ -51,11 +50,11 @@ namespace game::state::play
         weight_update();
       }
 
-      WIDGET_FX(ImGui::SliderScalar(strings.get(Strings::CheatsDigestionRate).c_str(), ImGuiDataType_Double,
-                                    &character.digestionRate, &digestionRateMin, &digestionRateMax,
+      WIDGET_FX(ImGui::SliderFloat(strings.get(Strings::CheatsDigestionRate).c_str(), &character.digestionRate,
+                                   digestionRateMin, digestionRateMax,
                                     strings.get(Strings::CheatsDigestionRateFormat).c_str()));
-      WIDGET_FX(ImGui::SliderScalar(strings.get(Strings::CheatsEatSpeed).c_str(), ImGuiDataType_Double,
-                                    &character.eatSpeed, &eatSpeedMin, &eatSpeedMax,
+      WIDGET_FX(ImGui::SliderFloat(strings.get(Strings::CheatsEatSpeed).c_str(), &character.eatSpeed, eatSpeedMin,
+                                   eatSpeedMax,
                                     strings.get(Strings::CheatsEatSpeedFormat).c_str()));
 
       if (WIDGET_FX(ImGui::Button(strings.get(Strings::CheatsDigestButton).c_str())))
