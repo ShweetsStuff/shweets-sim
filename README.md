@@ -6,6 +6,9 @@ Interactive character simulation game.
 
 [Resources](https://shweetz.net/files/games/feed-snivy/resources.zip)
 
+## Clarification
+This application was developed with the assistance of a large language model.
+
 ## Build
 
 After cloning and enter the repository's directory, make sure to initialize the submodules:
